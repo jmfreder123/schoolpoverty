@@ -1,0 +1,423 @@
+<title>State Poverty Measures</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: map and legend on the left, a short walk-through of the chosen state on the right, comparison tables below; one column on a phone. */
+:root{
+  --bg:#fbfbfa; --panel:#ffffff; --ink:#14181d; --ink2:#4b535c; --ink3:#7a828b; --rule:#dfe2e5;
+  --c1:#2a78d6; --c2:#eb6834; --c3:#1baf7a; --none:#d3d7db; --undef:#9aa1a8; --focus:#14181d; --bar:#e9ecef;
+  --flag:#8a5a00; --flagbg:#fff4d6;
+  --sans:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#15171a; --panel:#1c1f23; --ink:#eef0f2; --ink2:#bcc2c8; --ink3:#8b929a; --rule:#33383e;
+  --c1:#3987e5; --c2:#d95926; --c3:#199e70; --none:#3a4046; --undef:#6b727a; --focus:#eef0f2; --bar:#262a2f;
+  --flag:#f0c060; --flagbg:#3a2f12; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#15171a; --panel:#1c1f23; --ink:#eef0f2; --ink2:#bcc2c8; --ink3:#8b929a; --rule:#33383e;
+  --c1:#3987e5; --c2:#d95926; --c3:#199e70; --none:#3a4046; --undef:#6b727a; --focus:#eef0f2; --bar:#262a2f;
+  --flag:#f0c060; --flagbg:#3a2f12; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1{font-size:26px;line-height:1.2;margin:0;font-weight:700;text-wrap:balance}
+h2{font-size:20px;line-height:1.2;margin:0;text-wrap:balance}
+h3{font-size:15px;margin:0}
+.sub{color:var(--ink2);max-width:68ch;margin:0}
+.note{font-size:13px;color:var(--flag);background:var(--flagbg);padding:6px 10px;border-radius:4px;align-self:flex-start}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs button,.btn{font:inherit;font-weight:500;padding:7px 12px;border:1px solid var(--rule);background:var(--panel);color:var(--ink2);border-radius:4px;cursor:pointer;text-decoration:none}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn{border-color:var(--ink);color:var(--ink);background:none}
+.btn.solid{background:var(--ink);color:var(--bg)}
+.btn:disabled{opacity:.35;cursor:default}
+button:focus-visible,a:focus-visible,.st:focus-visible,select:focus-visible,th:focus-visible,td:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.mapbox{position:relative}
+#back{position:absolute;left:0;top:0}
+svg.map{width:100%;height:auto;display:block}
+.st{stroke:var(--bg);stroke-width:1.2;cursor:pointer;outline:none;vector-effect:non-scaling-stroke}
+.st.dim{opacity:.22}
+.st.sel{stroke:var(--focus);stroke-width:2.6}
+.lab{font:600 10px var(--sans);fill:var(--ink);pointer-events:none;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:2.5px;stroke-linejoin:round}
+.zoomed .lab,.zoomed .dot{display:none}
+.dot{fill:var(--ink);stroke:var(--bg);stroke-width:1.2;pointer-events:none}
+.legend{display:flex;flex-direction:column;gap:4px}
+.legend button{font:inherit;text-align:left;display:grid;grid-template-columns:22px minmax(0,1.3fr) minmax(40px,1fr) 2ch;gap:10px;align-items:center;padding:5px 8px;border:1px solid transparent;border-radius:4px;background:none;color:var(--ink);cursor:pointer}
+.legend button:hover{border-color:var(--rule)}
+.legend button[aria-pressed="true"]{border-color:var(--ink);background:var(--panel)}
+.track{height:10px;background:var(--bar);border-radius:2px;display:block}
+.track i{display:block;height:10px;background:var(--ink2);border-radius:2px 4px 4px 2px}
+.sw{width:22px;height:14px;border-radius:2px;display:block;flex:none}
+.n{font-variant-numeric:tabular-nums;color:var(--ink2);text-align:right}
+.hint{font-size:13px;color:var(--ink3);margin:0}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.eyebrow{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink3);font-weight:600;margin:0}
+.lead{color:var(--ink2);margin:0}
+.big{font-size:22px;line-height:1.25;font-weight:700;margin:0;display:flex;gap:10px;align-items:flex-start;text-wrap:balance}
+.big .sw{margin-top:8px}
+.fact{margin:0;border-left:3px solid var(--ink);padding-left:10px;overflow-wrap:anywhere}
+.keep{display:flex;flex-direction:column;gap:4px;font-size:14px;border-bottom:1px solid var(--rule);padding-bottom:12px}
+.line{border-top:1px solid var(--rule);padding:10px 0 0}
+.line>summary{list-style:none;display:flex;flex-direction:column;gap:3px;font-weight:400}
+.line>summary::-webkit-details-marker{display:none}
+.line .q{font-size:13px;color:var(--ink3)}
+.line .a{display:flex;gap:8px;align-items:flex-start;font-weight:600;font-size:16px;line-height:1.3}
+.line .a .sw{margin-top:4px}
+.line.cur .a{font-size:18px}
+.line .more{display:flex;flex-direction:column;gap:10px;padding:10px 0 4px 30px}
+.line>summary:after{content:'What this means';font-size:12px;color:var(--ink3);text-decoration:underline;margin-left:30px}
+.line[open]>summary:after{content:'Hide'}
+.inner{border-top:0;padding-top:0}
+.quote p{margin:0 0 8px;padding-left:10px;border-left:2px solid var(--rule)}
+.srcs{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.srcs a{color:var(--ink);text-decoration:underline;overflow-wrap:anywhere}
+.inner>summary{font-weight:500;font-size:13px;color:var(--ink2)}
+.steps{display:flex;gap:6px}
+.steps button{flex:1;height:6px;border:0;border-radius:3px;background:var(--bar);cursor:pointer;padding:0}
+.steps button[aria-current="step"]{background:var(--ink)}
+.flag{font-size:13px;color:var(--flag);background:var(--flagbg);padding:6px 10px;border-radius:4px}
+details{border-top:1px solid var(--rule);padding-top:8px}
+.panel details.line,.panel details.inner{}
+summary{cursor:pointer;font-weight:600;font-size:14px}
+dl{margin:8px 0 0;display:flex;flex-direction:column;gap:10px}
+dt{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink3);font-weight:600}
+dd{margin:2px 0 0;overflow-wrap:anywhere;font-size:14px}
+.mono{font-family:var(--mono);font-size:12px;color:var(--ink2);overflow-wrap:anywhere}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-size:12px;letter-spacing:.03em;text-transform:uppercase;color:var(--ink3);font-weight:600;white-space:nowrap}
+th[data-sort]{cursor:pointer}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+td.cell{cursor:pointer}
+td.cell:hover,td.cell.on{background:var(--bar)}
+tr.pick{cursor:pointer}
+tr.pick:hover td{background:var(--bar)}
+.chip{display:inline-flex;gap:6px;align-items:center}
+select{font:inherit;padding:6px 8px;border:1px solid var(--rule);border-radius:4px;background:var(--panel);color:var(--ink);max-width:100%}
+textarea{width:100%;height:160px;font-family:var(--mono);font-size:12px;background:var(--panel);color:var(--ink);border:1px solid var(--rule);border-radius:4px;padding:8px}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-size:13px;padding:5px 8px;border-radius:4px;max-width:260px;z-index:20}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.card{border:1px solid var(--rule);background:var(--panel);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.card b{font-size:30px;line-height:1.1;font-weight:700;font-variant-numeric:tabular-nums}
+.card .cat{font-size:16px;line-height:1.3;font-weight:700;display:flex;gap:8px;align-items:flex-start}
+.card .cat .sw{margin-top:4px}
+.card span.l{color:var(--ink2);font-size:14px}
+.summary{background:var(--bar);padding:10px 14px;border-radius:4px;margin:0;max-width:90ch}
+.charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 32px}
+@media (max-width:760px){.charts{grid-template-columns:minmax(0,1fr)}}
+.chart{display:flex;flex-direction:column;gap:4px;min-width:0}
+.chart h3{margin-bottom:4px}
+.barrow{font:inherit;text-align:left;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(50px,1fr) 2ch;gap:10px;align-items:center;padding:4px 6px;border:1px solid transparent;border-radius:4px;background:none;color:var(--ink2);cursor:pointer;font-size:14px}
+.barrow:hover{border-color:var(--rule)}
+.barrow.me{color:var(--ink);font-weight:600}
+.barrow .track i{background:var(--undef)}
+.barrow.me .track i,.charts.nat .barrow .track i{background:var(--ink2)}
+.barrow.me .track i{background:var(--ink)}
+.explain{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px 32px;align-items:start;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding-block:18px}
+@media (max-width:860px){.explain{grid-template-columns:minmax(0,1fr)}}
+.explain p{margin:0;max-width:62ch;color:var(--ink2)}
+.terms{border:1px solid var(--rule);border-radius:6px;background:var(--panel);padding:12px 14px}
+.terms dd{color:var(--ink2)}
+section.block{border-top:1px solid var(--rule);padding-top:18px}
+footer{font-size:13px;color:var(--ink3);border-top:1px solid var(--rule);padding-top:12px;max-width:80ch}
+@media (prefers-reduced-motion:no-preference){.st{transition:opacity .15s}}
+</style>
+
+<div class="wrap">
+  <header class="col" style="gap:8px">
+    <h1>How states count student poverty, school year 2025-26</h1>
+    <p class="sub">Schools get extra money and extra attention for students in poverty. But each state decides for itself who counts. This shows what all 50 states and the District of Columbia do, read from their laws, plans and manuals.</p>
+    <span class="note">Prototype. The map categories are a draft and have not been approved.</span>
+  </header>
+
+  <section class="explain" id="explainer" aria-label="Why this matters">
+    <div class="col" style="gap:10px">
+      <h2>Why this matters</h2>
+      <p>States send extra money to schools for students in poverty, and they report test scores and other results for low-income students separately. Both depend on a count of who those students are.</p>
+      <p>For a long time that count came from the school lunch program. A family filled out a form, and a student whose family income was low enough qualified for free or reduced-price meals.</p>
+      <p>That is changing. Many schools in high-poverty areas now serve free meals to every student and no longer collect the forms. States have replaced the old count in different ways, and some have not said how.</p>
+      <p>The result is that "a student in poverty" does not mean the same thing from one state to the next, or even between a state's funding formula and its own report cards.</p>
+    </div>
+    <details class="terms">
+      <summary>What the terms mean</summary>
+      <dl>
+        <div><dt>Funding formula</dt><dd>The rules a state uses to divide school money among its districts.</dd></div>
+        <div><dt>Main formula</dt><dd>The formula that carries most of the state's school money. A state can also run smaller programs outside it.</dd></div>
+        <div><dt>Per-student amount</dt><dd>The dollars the formula starts with for each student, before anything is added. Officials often call it the base amount.</dd></div>
+        <div><dt>Weight</dt><dd>How much more than one student a student counts for. A weight of 0.25 means that student brings a quarter more of the per-student amount.</dd></div>
+        <div><dt>Free or reduced-price meals</dt><dd>The federal school lunch program gives free or cheaper meals to students whose family income is below set levels. Often shortened to FRL or FRPL.</dd></div>
+        <div><dt>Direct certification</dt><dd>Matching students to records of public benefits, such as food assistance (SNAP) or cash assistance (TANF), so they qualify for free meals without a form.</dd></div>
+        <div><dt>Community Eligibility Provision (CEP)</dt><dd>A federal option that lets schools in high-poverty areas serve free meals to every student and stop collecting meal forms.</dd></div>
+        <div><dt>Economically disadvantaged</dt><dd>The name federal law uses for the low-income group on school report cards. Each state decides who is in it.</dd></div>
+        <div><dt>Report cards</dt><dd>The public reports each state issues on how its schools and groups of students are doing. Officials call the system behind them accountability.</dd></div>
+        <div><dt>Not found in the sources read</dt><dd>Nothing was found in the laws, plans and manuals that were read for that state. It does not mean nothing exists.</dd></div>
+      </dl>
+    </details>
+  </section>
+
+  <div class="tabs" role="tablist" aria-label="Choose view" id="tabs"></div>
+  <p class="sub" id="about"></p>
+
+  <div class="grid">
+    <div class="col">
+      <div class="mapbox">
+        <svg class="map" id="map" viewBox="0 0 975 610" role="group" aria-label="Map of the United States">
+          <defs>
+            <pattern id="h1" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="var(--bg)"/><rect width="4" height="7" fill="var(--c1)"/></pattern>
+            <pattern id="hu" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(135)"><rect width="7" height="7" fill="var(--bg)"/><rect width="3" height="7" fill="var(--undef)"/></pattern>
+          </defs>
+          <g id="states"></g><g id="labels"></g>
+        </svg>
+        <button class="btn solid" id="back" type="button" hidden>Back to the map</button>
+      </div>
+      <p class="hint" id="markerhint" hidden>A dot marks a state that has a poverty program outside its main formula.</p>
+      <div class="legend" id="legend" aria-label="Categories"></div>
+      <p class="hint">Choose a category to highlight its states. Choose it again to clear.</p>
+    </div>
+    <aside class="panel" id="profile" aria-live="polite"></aside>
+  </div>
+
+  <section class="col block" id="compare">
+    <div class="row" style="justify-content:space-between">
+      <h2 id="ovh">National overview</h2>
+      <div class="row"><label for="pick">Show</label><select id="pick"></select></div>
+    </div>
+    <div class="cards" id="cards"></div>
+    <p class="summary" id="summary"></p>
+    <div class="charts" id="charts"></div>
+    <p class="hint">Each bar is a count of states. Choose a bar to see those states on the map.</p>
+    <details><summary>How states pay for schools, and for poverty</summary>
+      <div class="col" style="margin-top:10px">
+        <div class="charts" id="charts2"></div>
+        <p class="fact" id="mlist" hidden></p>
+        <p class="hint">Choose a bar to list its states.</p>
+      </div>
+    </details>
+    <details><summary>Two states side by side</summary>
+      <div class="col" style="margin-top:10px">
+        <div class="row"><label for="sa">First</label><select id="sa"></select><label for="sb">Second</label><select id="sb"></select></div>
+        <div class="scroll"><table id="side"></table></div>
+      </div>
+    </details>
+    <details><summary>All states in one table</summary>
+      <div class="col" style="margin-top:10px">
+        <p class="hint">Choose a column heading to sort. Choose a row to open that state.</p>
+        <div class="scroll"><table id="all"></table></div>
+      </div>
+    </details>
+  </section>
+
+  <section class="col block">
+    <div class="row"><button class="btn" id="csvbtn" type="button" aria-expanded="false">Get the data (CSV)</button></div>
+    <div id="csvbox" class="col" hidden>
+      <textarea id="csvtext" readonly aria-label="Published table as CSV"></textarea>
+      <div class="row"><button class="btn" id="copybtn" type="button">Copy</button><span class="hint" id="copymsg"></span></div>
+      <p class="hint">On the hosted site this will also offer the file to save.</p>
+    </div>
+  </section>
+
+  <footer>Collected by machine from primary sources, with a human audit of 45 higher-risk lines. Each state shows how its values were checked. "None found" and "not found" mean nothing was found in the sources read, not that nothing exists. Puerto Rico is not shown.</footer>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+const DATA=__DATA__, PATHS=__PATHS__, CSV=__CSV__;
+const PLAIN={
+ F:{FRL:['Students who qualify for free or reduced-price school meals','Based on family income, usually from a form families fill out for the school lunch program.'],
+    MIX:['School meals plus another measure','The state looks at who qualifies for school meals and at a second source, such as public benefits or Census figures.'],
+    DC:['Students whose families get public benefits','Students are matched to programs such as food assistance (SNAP), cash assistance (TANF) or Medicaid, or are homeless or in foster care. No school meal form is needed. Officials often call this direct certification.'],
+    INC:['Family income, tax records or Census figures','The count comes from household income, tax returns or Census estimates, not from the school meals program.'],
+    UND:['The formula adds money for poverty, but how students are counted was not found','The sources read do not say how the state decides which students count.'],
+    NONE:['No poverty count in the main formula','Nothing in the main funding formula counts students in poverty. A separate program outside the formula may still do so.']},
+ W:{W1:['Each student in poverty counts as more than one student','The formula treats a student in poverty as a bit more than one student, so the district gets a larger share of the per-student amount. The extra share is the same everywhere in the state.'],
+    W2:['The extra changes with how much poverty is nearby','The amount per student is not the same everywhere. It depends on the share of students in poverty in the district or school, or on a tier the student falls into.'],
+    W3:['A set dollar amount for each student in poverty','The district gets a fixed number of dollars for each such student.'],
+    W4:['Extra teachers or teaching time, not a dollar amount','The formula adds staff positions or hours of instruction for students in poverty.'],
+    W5:['Extra money for poverty, but the amount was not found','The formula has a poverty factor. The amount was not found in the sources read.'],
+    NONE:['No extra money for poverty in the main formula','Nothing was found in the main formula that adds money for students in poverty. A separate program outside the formula may still do so.']},
+ T:{SB:['A set amount per student, and some students count for more','The state sets a dollar amount for each student. Students with greater needs, such as students learning English or with disabilities, count for more.'],
+    RB:['The state pays for staff and services, not an amount per student','The state works out how many teachers and other staff a district needs for its enrollment and pays for those.'],
+    GT:['The state evens out what local property taxes can raise','Districts with less property wealth get more state money, so that the same tax effort raises about the same amount per student.'],
+    HY:['A mix of approaches, or the state\'s own model','The formula combines more than one approach or does not fit the common types.'],
+    NF:['Not found in the sources read','The sources read do not describe how the formula works.']},
+ A:{FRL:['Students who qualify for free or reduced-price school meals','Based on family income, usually from a school meal form.'],
+    PLUS:['School meals plus other signs of need','Meal eligibility, plus things like public benefits, homelessness, foster care or migrant status.'],
+    DC:['Students whose families get public benefits, with no meal form','Students are matched to programs such as food assistance (SNAP), cash assistance (TANF) or Medicaid.'],
+    OTH:['Another definition','The state uses wording that does not fit the other groups.'],
+    NF:['No definition found in the sources read','The sources read name the group but do not say who is in it.']},
+ C:{BASE:['The last count taken before meals became free for all','The state keeps using the share of students who qualified before the school stopped collecting meal forms.'],
+    DCI:['A count of students whose families get public benefits','The state counts students matched to programs such as SNAP or TANF.'],
+    FORM:['A separate income form, or checking each student','Families fill out a different income form, or the school identifies each student one by one.'],
+    NOMEAL:['Not needed: the formula never used meal counts','The state already counts poverty another way, or has no poverty count, so free meals for all change nothing.'],
+    OTHER:['Another rule, or the method is not stated','The sources read point to a rule but do not fit the other groups.'],
+    NF:['No rule found in the sources read','The sources read do not say what the state does.']},
+ M:{UNI:['Free meals for all students, by state law',''],PART:['Free for all in some schools or grades, or only if funded',''],EXP:['Free for more students than federal rules require, but not all',''],NONE:['No state law found in the sources read','']}
+};
+const DESC={};for(const L in PLAIN){DESC[L]={};for(const c in PLAIN[L]){DATA.labels[L][c]=PLAIN[L][c][0];DESC[L][c]=PLAIN[L][c][1]}}
+const VIEWS=[
+ {id:'funding',k:'cF',L:'F',name:'Who counts as in poverty, for funding',short:'Who counts, for funding',about:'To send extra money for students in poverty, a state first has to decide which students count. This is how each state decides.',order:['FRL','MIX','DC','INC','UND','NONE'],fill:{FRL:'var(--c1)',MIX:'url(#h1)',DC:'var(--c2)',INC:'var(--c3)',UND:'url(#hu)',NONE:'var(--none)'},fields:['measure'],stat:'st_f',
+  lead:s=>'When it funds schools, '+s.state+' counts a student as in poverty this way:',fact:s=>null},
+ {id:'accountability',k:'cA',L:'A',name:'Who counts as low-income on report cards',short:'Who counts, on report cards',about:'States must report test scores and other results separately for low-income students. This is how each state decides who is in that group. It is often not the same as the count used for funding.',order:['FRL','PLUS','DC','OTH','NF'],fill:{FRL:'var(--c1)',PLUS:'url(#h1)',DC:'var(--c2)',OTH:'var(--c3)',NF:'var(--none)'},fields:['acct'],stat:'st_a',
+  lead:s=>'On school report cards, '+s.state+' counts a student as low-income this way:',fact:s=>null},
+ {id:'cep',k:'cC',L:'C',name:'When school meals are free for everyone',short:'When meals are free for all',about:'Many schools now serve free meals to every student under a federal option called the Community Eligibility Provision (CEP), so families no longer fill out meal forms. States that counted poverty from those forms need another way.',order:['BASE','DCI','FORM','NOMEAL','OTHER','NF'],fill:{BASE:'var(--c1)',DCI:'var(--c2)',FORM:'var(--c3)',NOMEAL:'var(--undef)',OTHER:'url(#hu)',NF:'var(--none)'},fields:['cep','meals'],stat:'st_m',
+  lead:s=>'In schools that serve free meals to everyone, '+s.state+' counts poverty using:',fact:s=>'State law on free meals: '+DATA.labels.M[s.cM]},
+ {id:'formula',k:'cT',L:'T',name:'How the state funds schools',short:'How the state funds schools',about:'Every state has a formula for sending money to schools. They work in a few different ways.',order:['SB','RB','GT','HY','NF'],fill:{SB:'var(--c1)',RB:'var(--c2)',GT:'var(--c3)',HY:'url(#hu)',NF:'var(--none)'},fields:['type','base'],stat:'st_t',
+  lead:s=>'How '+s.state+' funds its schools:',fact:s=>s.base&&s.base.trim().length<=170?'Per-student amount, as we recorded it: '+s.base.trim():null},
+ {id:'mech',k:'cW',L:'W',name:'How poverty adds money',short:'How poverty adds money',about:'Once students are counted, the formula has to turn that count into dollars. This is how each state does it.',order:['W1','W2','W3','W4','W5','NONE'],fill:{W1:'var(--c1)',W2:'url(#h1)',W3:'var(--c2)',W4:'var(--c3)',W5:'url(#hu)',NONE:'var(--none)'},fields:['weight','measure'],stat:'st_f',
+  lead:s=>'What the funding formula does for those students:',fact:s=>s.weight&&s.weight.length<=170?'The amount, as we recorded it: '+s.weight:null}
+];
+const V=id=>VIEWS.find(v=>v.id===id);
+const MAPV=VIEWS.slice(0,3), MONEY=VIEWS.slice(3);
+const ASK={funding:'Who counts as in poverty, for funding?',accountability:'Who counts as low-income on report cards?',cep:'What is used when school meals are free for everyone?',formula:'How does the state fund its schools?',mech:'How does poverty add money?'};
+const FIELD={measure:'Our summary of who counts for funding',weight:'Our summary of the extra for poverty',acct:'Our summary of the report card definition',cep:'Our summary of the rule for schools with free meals for all',meals:'Our summary of state law on free meals',type:'Our summary of how the formula works',base:'Per-student amount, as we recorded it'};
+const FLAGS={WY:'Accountability: held until the approved state plan is read.',LA:'Funding: sources disagree on which resolution sets the 2025-26 formula.',NJ:'Weight and base amount are the state report\'s recommendations; legislative action was not read.',OK:'Base amount: matched to the statute\'s term by the collector\'s reading.'};
+const S=DATA.states, byAb=Object.fromEntries(S.map(s=>[s.abbr,s])), LAB=(v,s)=>DATA.labels[v.L][s[v.k]];
+let view=VIEWS[0], sel=null, hi=null, vb=[0,0,975,610], anim=null;
+const $=id=>document.getElementById(id), NS='http://www.w3.org/2000/svg';
+function el(t,a={},txt){const e=document.createElement(t);for(const k in a){if(a[k]!==false&&a[k]!=null)e.setAttribute(k,a[k])}if(txt!=null)e.textContent=txt;return e}
+function sw(fill){const s=document.createElementNS(NS,'svg');s.setAttribute('class','sw');s.setAttribute('viewBox','0 0 22 14');s.setAttribute('aria-hidden','true');const r=document.createElementNS(NS,'rect');r.setAttribute('width',22);r.setAttribute('height',14);r.setAttribute('rx',2);r.setAttribute('fill',fill);s.appendChild(r);return s}
+function chip(v,s){const c=el('span',{class:'chip'});c.appendChild(sw(v.fill[s[v.k]]));c.appendChild(el('span',{},LAB(v,s)));return c}
+
+function buildMap(){
+  const g=$('states'),lg=$('labels');
+  S.forEach(s=>{const p=PATHS[s.fips];if(!p)return;
+    const path=document.createElementNS(NS,'path');path.setAttribute('d',p.d);path.setAttribute('class','st');path.setAttribute('tabindex','0');path.setAttribute('role','button');path.dataset.ab=s.abbr;
+    path.addEventListener('click',()=>openState(s.abbr));
+    path.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openState(s.abbr)}});
+    path.addEventListener('pointermove',e=>tip(e,s));path.addEventListener('pointerleave',()=>{$('tip').hidden=true});
+    g.appendChild(path);
+    if(p.a>1500){const t=document.createElementNS(NS,'text');t.setAttribute('x',p.c[0]);t.setAttribute('y',p.c[1]+4);t.setAttribute('class','lab');t.textContent=s.abbr;lg.appendChild(t)}
+    const c=document.createElementNS(NS,'circle');c.setAttribute('cx',p.c[0]+(p.a>1500?13:0));c.setAttribute('cy',p.c[1]-(p.a>1500?9:0));c.setAttribute('r',3.6);c.setAttribute('class','dot');c.dataset.m=s.abbr;lg.appendChild(c);
+  });
+}
+function tip(e,s){const t=$('tip');t.textContent=s.state+': '+LAB(view,s);t.hidden=false;t.style.left=Math.min(e.clientX+12,window.innerWidth-270)+'px';t.style.top=(e.clientY+14)+'px'}
+function zoomTo(t){
+  const from=vb.slice(),reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(anim)cancelAnimationFrame(anim);
+  const set=v=>{vb=v;$('map').setAttribute('viewBox',v.map(x=>x.toFixed(1)).join(' '))};
+  if(reduce){set(t);return}
+  const t0=performance.now(),D=450;
+  (function f(now){const k=Math.min(1,Math.max(0,(now-t0)/D)),e=1-Math.pow(1-k,3);set(from.map((a,i)=>a+(t[i]-a)*e));if(k<1)anim=requestAnimationFrame(f)})(t0);
+}
+function boxFor(ab){const b=PATHS[byAb[ab].fips].b;let w=b[2]-b[0],h=b[3]-b[1];const cx=(b[0]+b[2])/2,cy=(b[1]+b[3])/2;
+  w=Math.max(w*1.9,150);h=Math.max(h*1.9,95);const r=975/610;if(w/h<r)w=h*r;else h=w/r;return [cx-w/2,cy-h/2,w,h]}
+function paint(){
+  document.querySelectorAll('.st').forEach(p=>{const s=byAb[p.dataset.ab];p.setAttribute('fill',view.fill[s[view.k]]);
+    const dim=sel?s.abbr!==sel:(!!hi&&s[view.k]!==hi);p.classList.toggle('dim',dim);p.classList.toggle('sel',sel===s.abbr);
+    p.setAttribute('aria-label',s.state+', '+LAB(view,s))});
+  document.querySelectorAll('.dot').forEach(c=>{c.style.display=(view.id==='funding'&&byAb[c.dataset.m].marker)?'':'none'});
+  $('markerhint').hidden=view.id!=='funding'||!!sel;
+  $('map').classList.toggle('zoomed',!!sel);$('back').hidden=!sel;
+  const selp=document.querySelector('.st.sel');if(selp)selp.parentNode.appendChild(selp);
+  document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected',b.id==='tab-'+view.id));
+}
+function buildTabs(){const t=$('tabs');MAPV.forEach(v=>{const b=el('button',{role:'tab',type:'button',id:'tab-'+v.id},v.name);
+  b.addEventListener('click',()=>{view=v;hi=null;render()});t.appendChild(b)})}
+function buildLegend(){const L=$('legend');L.textContent='';const max=Math.max(...view.order.map(c=>S.filter(s=>s[view.k]===c).length));
+  view.order.forEach(c=>{const n=S.filter(s=>s[view.k]===c).length;if(!n)return;
+    const b=el('button',{type:'button','aria-pressed':hi===c,'aria-label':DATA.labels[view.L][c]+', '+n,title:DESC[view.L][c]||''});b.appendChild(sw(view.fill[c]));b.appendChild(el('span',{},DATA.labels[view.L][c]));
+    const tr=el('span',{class:'track'});const i=el('i');i.style.width=(100*n/max)+'%';tr.appendChild(i);b.appendChild(tr);b.appendChild(el('span',{class:'n'},String(n)));
+    b.addEventListener('click',()=>{hi=hi===c?null:c;if(sel)closeState();else render()});L.appendChild(b)})}
+const TABOF={funding:'1',mech:'1',accountability:'2',cep:'3',formula:'4'};
+function fieldsBlock(s,v){const dl=el('dl');const src=(s.src||{})[TABOF[v.id]]||{cite:[],quote:[],sources:[]};
+  const add=(t,node)=>{const d=el('div');d.appendChild(el('dt',{},t));d.appendChild(node);dl.appendChild(d)};
+  v.fields.forEach(f=>add(FIELD[f],el('dd',{},(s[f]||'').trim()||(f==='weight'?'No single amount recorded':'Not found in sources read'))));
+  if(src.quote.length&&v.id!=='mech'){const dd=el('dd',{class:'quote'});src.quote.join(' | ').split(/\s\|\|?\s/).forEach(q=>{if(q.trim())dd.appendChild(el('p',{},q.trim()))});add('What the source says (quoted; our notes are in square brackets)',dd)}
+  if(src.cite.length)add('Cited as',el('dd',{},src.cite.join(' | ')));
+  if(src.sources.length){const dd=el('dd');const ul=el('ul',{class:'srcs'});src.sources.forEach(x=>{const li=el('li');
+      if(x.url){li.appendChild(el('a',{href:x.url,target:'_blank',rel:'noopener'},x.title||x.id))}else{li.appendChild(el('span',{},(x.title||x.id)+' (no web address on record)'))}
+      if(x.issuer)li.appendChild(el('span',{class:'hint'},' \u00b7 '+x.issuer));li.appendChild(el('span',{class:'mono'},' '+x.id));ul.appendChild(li)});dd.appendChild(ul);add('Sources read for this',dd)}
+  add('How this was checked',el('dd',{},s[v.stat]||'not recorded'));return dl}
+function line(s,v){
+  const det=el('details',{class:'line'+(v===view?' cur':'')});if(v===view)det.open=true;
+  const sm=el('summary');sm.appendChild(el('span',{class:'q'},ASK[v.id]));const a=el('span',{class:'a'});a.appendChild(sw(v.fill[s[v.k]]));a.appendChild(el('span',{},LAB(v,s)));sm.appendChild(a);det.appendChild(sm);
+  const body=el('div',{class:'more'});
+  const ds=DESC[v.L][s[v.k]];if(ds)body.appendChild(el('p',{class:'lead'},ds));
+  const f=v.fact(s);if(f)body.appendChild(el('p',{class:'fact'},f));
+  if((v.id==='funding'||v.id==='mech')&&s.marker)body.appendChild(el('div',{class:'flag'},'A poverty program exists outside the main funding formula.'));
+  const same=S.filter(o=>o[v.k]===s[v.k]&&o.abbr!==s.abbr);
+  body.appendChild(el('p',{class:'hint'},same.length?(same.length+' other '+(same.length===1?'state does':'states do')+' the same.'):'No other state does this.'));
+  const w=el('details',{class:'inner'});w.appendChild(el('summary',{},'See the source'));w.appendChild(fieldsBlock(s,v));body.appendChild(w);
+  det.appendChild(body);return det}
+function profile(){const P=$('profile');P.textContent='';
+  if(!sel){P.appendChild(el('h2',{},'Choose a state'));P.appendChild(el('p',{class:'lead'},view.about));
+    P.appendChild(el('p',{class:'hint'},'Choosing a state zooms the map to it and shows its answers to five questions. Or scroll down for the national overview.'));return}
+  const s=byAb[sel];
+  const top=el('div',{class:'row',style:'justify-content:space-between'});top.appendChild(el('h2',{},s.state));
+  const x=el('button',{class:'btn',type:'button'},'Back to the map');x.addEventListener('click',closeState);top.appendChild(x);P.appendChild(top);
+  if(FLAGS[s.abbr])P.appendChild(el('div',{class:'flag'},FLAGS[s.abbr]));
+  P.appendChild(el('p',{class:'eyebrow'},'Counting students'));MAPV.forEach(v=>P.appendChild(line(s,v)));
+  P.appendChild(el('p',{class:'eyebrow'},'Money'));MONEY.forEach(v=>P.appendChild(line(s,v)));
+  P.appendChild(el('p',{class:'hint'},'Choose any line to see what it means, what the source says, and a link to it.'));
+}
+function openState(ab,quiet){if(sel===ab){closeState();return}sel=ab;hi=null;zoomTo(boxFor(ab));render();
+  if(!quiet&&window.innerWidth<=860)$('profile').scrollIntoView({block:'nearest',behavior:'smooth'})}
+function closeState(){sel=null;zoomTo([0,0,975,610]);render()}
+function render(){paint();buildLegend();profile();overview();$('about').textContent=view.about}
+document.addEventListener('keydown',e=>{if(sel&&e.key==='Escape')closeState()});
+$('back').addEventListener('click',closeState);
+
+/* compare */
+function fillSel(id,opts,val){const s=$(id);opts.forEach(([v,t])=>s.appendChild(el('option',{value:v},t)));s.value=val}
+function overview(){
+  const s=sel?byAb[sel]:null,n=S.length,cnt=(v,c)=>S.filter(x=>x[v.k]===c).length;
+  $('ovh').textContent=s?s.state+' compared with all states':'National overview';$('pick').value=sel||'';
+  const C=$('cards');C.textContent='';
+  const card=(big,label)=>{const d=el('div',{class:'card'});d.appendChild(el('b',{},String(big)));d.appendChild(el('span',{class:'l'},label));C.appendChild(d)};
+  const F=V('funding'),A=V('accountability'),X=V('cep'),M=V('mech');
+  if(!s){
+    const withF=n-cnt(F,'NONE'),top=v=>v.order.map(c=>[c,cnt(v,c)]).sort((a,b)=>b[1]-a[1])[0];
+        card(withF,'add money for student poverty in their main funding formula');
+    card(cnt(F,'FRL'),'count poverty by who qualifies for free or reduced-price school meals');
+    card(cnt(F,'DC')+cnt(F,'INC'),'count it from public benefits, family income or Census figures instead');
+    card(cnt(M,'W1'),'count each student in poverty as more than one student');
+    card(cnt(A,'FRL'),'use school meal eligibility alone to decide who is low-income on report cards');
+    card(S.filter(x=>x.cM==='UNI').length,'have a state law giving free meals to all students');
+    const tf=top(F),ta=top(A);
+    const lc=x=>x.charAt(0).toLowerCase()+x.slice(1);
+    $('summary').textContent='Of '+n+' (50 states and the District of Columbia), '+withF+' add money for student poverty in their main funding formula. The most common way to count poverty for funding: '+lc(DATA.labels.F[tf[0]])+' ('+tf[1]+'). The most common way on report cards: '+lc(DATA.labels.A[ta[0]])+' ('+ta[1]+'). For '+cnt(X,'NF')+', the sources read do not say what the state does when a school serves free meals to everyone. Choose a state above to see how it compares.';
+  }else{
+    VIEWS.forEach(v=>{const d=el('div',{class:'card'});d.appendChild(el('p',{class:'eyebrow'},v.short));const c=el('div',{class:'cat'});c.appendChild(sw(v.fill[s[v.k]]));c.appendChild(el('span',{},LAB(v,s)));d.appendChild(c);
+      const o=cnt(v,s[v.k])-1;d.appendChild(el('span',{class:'l'},o?(o+' other '+(o===1?'state does':'states do')+' the same'):'No other state does this'));C.appendChild(d)});
+    const twins=S.filter(o=>o.abbr!==s.abbr&&VIEWS.every(v=>o[v.k]===s[v.k])).map(o=>o.state);
+    $('summary').textContent=twins.length?('States that answer all five questions the same way as '+s.state+': '+twins.join(', ')+'.'):('No other state answers all five questions the same way as '+s.state+'.');
+  }
+  const chart=(v,clickable)=>{const d=el('div',{class:'chart'});d.appendChild(el('h3',{},ASK[v.id]));const max=Math.max(...v.order.map(c=>cnt(v,c)));
+    v.order.forEach(c=>{const k=cnt(v,c);if(!k)return;const me=s&&s[v.k]===c;const names=S.filter(x=>x[v.k]===c).map(x=>x.state).join(', ');
+      const b=el('button',{type:'button',class:'barrow'+(me?' me':''),title:names,'aria-label':DATA.labels[v.L][c]+', '+k+(me?', includes '+s.state:'')});
+      b.appendChild(el('span',{},DATA.labels[v.L][c]+(me?' \u2190 '+s.state:'')));const tr=el('span',{class:'track'});const i=el('i');i.style.width=(100*k/max)+'%';tr.appendChild(i);b.appendChild(tr);b.appendChild(el('span',{class:'n'},String(k)));
+      b.addEventListener('click',()=>{if(clickable){sel=null;zoomTo([0,0,975,610]);view=v;hi=c;render();$('tabs').scrollIntoView({block:'start',behavior:'smooth'})}else{const x=$('mlist');x.hidden=false;x.textContent=DATA.labels[v.L][c]+': '+names+'.'}});d.appendChild(b)});
+    return d};
+  const W=$('charts');W.textContent='';W.classList.toggle('nat',!s);MAPV.forEach(v=>W.appendChild(chart(v,true)));
+  const W2=$('charts2');W2.textContent='';W2.classList.toggle('nat',!s);MONEY.forEach(v=>W2.appendChild(chart(v,false)));
+}
+function side(){const a=byAb[$('sa').value],b=byAb[$('sb').value],T=$('side');T.textContent='';
+  const hr=el('tr');hr.appendChild(el('th',{},''));hr.appendChild(el('th',{},a.state));hr.appendChild(el('th',{},b.state));T.appendChild(hr);
+  VIEWS.forEach(v=>{const tr=el('tr');tr.appendChild(el('td',{},v.short));[a,b].forEach(s=>{const td=el('td');td.appendChild(chip(v,s));const f=v.fact(s);if(f&&v.id!=='cep')td.appendChild(el('div',{class:'hint'},f));tr.appendChild(td)});T.appendChild(tr)});
+  const tr=el('tr');tr.appendChild(el('td',{},'State law on free meals'));[a,b].forEach(s=>tr.appendChild(el('td',{},DATA.labels.M[s.cM])));T.appendChild(tr);
+}
+let sortKey='state',sortDir=1;
+function allTable(){const T=$('all');T.textContent='';const hr=el('tr');
+  [['state','State']].concat(VIEWS.map(v=>[v.k,v.short])).forEach(([k,t])=>{const th=el('th',{'data-sort':k,tabindex:'0','aria-sort':sortKey===k?(sortDir>0?'ascending':'descending'):false},t+(sortKey===k?(sortDir>0?' ↑':' ↓'):''));
+    const f=()=>{sortDir=sortKey===k?-sortDir:1;sortKey=k;allTable()};th.addEventListener('click',f);th.addEventListener('keydown',e=>{if(e.key==='Enter'){f()}});hr.appendChild(th)});T.appendChild(hr);
+  const val=s=>{if(sortKey==='state')return s.state;const v=VIEWS.find(v=>v.k===sortKey);return String(v.order.indexOf(s[v.k])).padStart(2,'0')+s.state};
+  S.slice().sort((a,b)=>val(a)<val(b)?-sortDir:sortDir).forEach(s=>{const tr=el('tr',{class:'pick'});tr.appendChild(el('td',{},s.state));VIEWS.forEach(v=>{const td=el('td');td.appendChild(chip(v,s));tr.appendChild(td)});
+    tr.addEventListener('click',()=>{if(sel!==s.abbr)openState(s.abbr);$('map').scrollIntoView({block:'start',behavior:'smooth'})});T.appendChild(tr)});
+}
+fillSel('pick',[['','National overview']].concat(S.map(s=>[s.abbr,s.state])),'');
+$('pick').addEventListener('change',e=>{const ab=e.target.value;if(!ab){closeState();return}sel=ab;hi=null;zoomTo(boxFor(ab));render()});
+fillSel('sa',S.map(s=>[s.abbr,s.state]),'MS');fillSel('sb',S.map(s=>[s.abbr,s.state]),'TN');
+['sa','sb'].forEach(i=>$(i).addEventListener('change',side));
+
+$('csvbtn').addEventListener('click',()=>{const b=$('csvbox');b.hidden=!b.hidden;$('csvbtn').setAttribute('aria-expanded',!b.hidden);if(!b.hidden)$('csvtext').value=CSV});
+$('copybtn').addEventListener('click',()=>{const done=()=>{$('copymsg').textContent='Copied'};const s2=()=>{$('csvtext').select();$('copymsg').textContent='Selected. Press copy on your keyboard.'};
+  try{navigator.clipboard.writeText(CSV).then(done,s2)}catch(e){s2()}});
+buildMap();buildTabs();side();allTable();render();
+</script>
