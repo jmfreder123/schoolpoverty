@@ -5,11 +5,18 @@ def load(n):
     return json.loads(raw[raw.find('{'):])['values']
 head=load('1794417509190'); prov=load('1794417511264')
 tabs={'1':load('1794417528429'),'2':load('1794417530874'),'3':load('1794417532682'),'4':load('1794417534420')}
+def addr(cell):
+    # first address in the cell; a note in brackets after a space is dropped; spaces inside an address are encoded
+    c=cell.strip()
+    if 'http' not in c or re.search('guess',c,re.I) or 'google.com/search' in c: return ''
+    c=c[c.index('http'):].split(' ; ')[0]
+    c=re.sub(r'\s+\(.*\)\s*$','',c).strip().rstrip('.,')
+    return c.replace(' ','%20')
 P={}
 for r in prov:
     r=r+['']*5
     if r[0]: 
-        m=re.search(r'https?://[^\s;)\]"]+',r[4]); P[r[0]]=dict(id=r[0],kind=r[1],title=r[2],issuer=r[3],url=(m.group(0).rstrip('.,') if (m and not re.search('guess',r[4],re.I)) else ''))
+        P[r[0]]=dict(id=r[0],kind=r[1],title=r[2],issuer=r[3],url=addr(r[4]))
 col={'1':dict(cite=7,quote=4,ids=10),'2':dict(cite=6,quote=4,ids=7),'3':dict(cite=4,quote=6,ids=7),'4':dict(cite=8,quote=None,ids=9)}
 out={}
 for h in head:
