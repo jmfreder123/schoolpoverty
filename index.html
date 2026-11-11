@@ -195,7 +195,7 @@ footer{font-size:13px;color:var(--ink3);border-top:1px solid var(--rule);padding
     <p class="summary" id="summary"></p>
     <div class="charts" id="charts"></div>
     <p class="hint">Choose a bar to see those states on the map.</p>
-    <details><summary>How states pay for schools, and for poverty</summary>
+    <details><summary>More comparisons: when meals are free for everyone, and how states pay for schools</summary>
       <div class="col" style="margin-top:10px">
         <div class="charts" id="charts2"></div>
         <p class="fact" id="mlist" hidden></p>
@@ -276,7 +276,7 @@ const VIEWS=[
   lead:s=>'What the funding formula does for those students:',fact:s=>s.weight&&s.weight.length<=170?'The amount, as we recorded it: '+s.weight:null}
 ];
 const V=id=>VIEWS.find(v=>v.id===id);
-const MAPV=VIEWS.slice(0,3), MONEY=VIEWS.slice(3);
+const MAPV=VIEWS.slice(0,2), COUNTV=VIEWS.slice(0,3), MONEY=VIEWS.slice(3);
 const ASK={funding:'Who counts as in poverty, for funding?',accountability:'Who counts as low-income on report cards?',cep:'What is used when school meals are free for everyone?',formula:'How does the state fund its schools?',mech:'How does poverty add money?'};
 const FIELD={measure:'Our summary of who counts for funding',weight:'Our summary of the extra for poverty',acct:'Our summary of the report card definition',cep:'Our summary of the rule for schools with free meals for all',meals:'Our summary of state law on free meals',type:'Our summary of how the formula works',base:'Per-student amount, as we recorded it'};
 const FLAGS={WY:'Accountability: held until the approved state plan is read.',LA:'Funding: sources disagree on which resolution sets the 2025-26 formula.',NJ:'Weight and base amount are the state report\'s recommendations; legislative action was not read.',OK:'Base amount: matched to the statute\'s term by the collector\'s reading.'};
@@ -356,7 +356,7 @@ function profile(){const P=$('profile');P.textContent='';
   const top=el('div',{class:'row',style:'justify-content:space-between'});top.appendChild(el('h2',{},s.state));
   const x=el('button',{class:'btn',type:'button'},'Back to the map');x.addEventListener('click',closeState);top.appendChild(x);P.appendChild(top);
   if(FLAGS[s.abbr])P.appendChild(el('div',{class:'flag'},FLAGS[s.abbr]));
-  P.appendChild(el('p',{class:'eyebrow'},'Counting students'));MAPV.forEach(v=>P.appendChild(line(s,v)));
+  P.appendChild(el('p',{class:'eyebrow'},'Counting students'));COUNTV.forEach(v=>P.appendChild(line(s,v)));
   P.appendChild(el('p',{class:'eyebrow'},'Money'));MONEY.forEach(v=>P.appendChild(line(s,v)));
   P.appendChild(el('p',{class:'hint'},'Choose any line to see what it means, what the source says, and a link to it.'));
 }
@@ -399,7 +399,7 @@ function overview(){
       b.addEventListener('click',()=>{if(clickable){sel=null;zoomTo([0,0,975,610]);view=v;hi=c;render();$('tabs').scrollIntoView({block:'start',behavior:'smooth'})}else{const x=$('mlist');x.hidden=false;x.textContent=DATA.labels[v.L][c]+': '+names+'.'}});d.appendChild(b)});
     return d};
   const W=$('charts');W.textContent='';W.classList.toggle('nat',!s);MAPV.forEach(v=>W.appendChild(chart(v,true)));
-  const W2=$('charts2');W2.textContent='';W2.classList.toggle('nat',!s);MONEY.forEach(v=>W2.appendChild(chart(v,false)));
+  const W2=$('charts2');W2.textContent='';W2.classList.toggle('nat',!s);[VIEWS[2]].concat(MONEY).forEach(v=>W2.appendChild(chart(v,false)));
 }
 function side(){const a=byAb[$('sa').value],b=byAb[$('sb').value],T=$('side');T.textContent='';
   const hr=el('tr');hr.appendChild(el('th',{},''));hr.appendChild(el('th',{},a.state));hr.appendChild(el('th',{},b.state));T.appendChild(hr);
