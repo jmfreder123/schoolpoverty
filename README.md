@@ -6,6 +6,7 @@ The map categories and the wording on the page are a draft and have not been app
 
 - `index.html` is the whole site. The map shapes, the data and the script are inside it. There is no server and no outside library; the page loads two web fonts.
 - `data/` holds the same data as separate files: the published table (CSV), the per-state data with draft categories (`data.json`), the sources read for each line (`sources.json`) and the state outlines (`paths.json`).
+- `data/graphs.json` holds the figures behind the graphs: school revenue per student and the state, local and federal shares for fiscal years 2010 to 2024 (U.S. Census Bureau, Annual Survey of School System Finances), and the federal rule changes on the timeline.
 - `build/` holds the page without data (`template.html`) and the scripts that made the files in `data/` and filled the page. The scripts read exports of the project spreadsheet from paths on the machine where they were run; they are here as a record of how the page was built and will not run as they are.
 - `CNAME` tells GitHub Pages the site's address.
 

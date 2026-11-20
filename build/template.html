@@ -127,6 +127,45 @@ textarea{width:100%;height:160px;font-family:var(--mono);font-size:12px;backgrou
 .terms{border:1px solid var(--rule);border-radius:6px;background:var(--panel);padding:12px 14px}
 .terms dd{color:var(--ink2)}
 section.block{border-top:1px solid var(--rule);padding-top:18px}
+.gblock{display:flex;flex-direction:column;gap:8px;min-width:0;border-top:1px solid var(--rule);padding-top:16px}
+.gblock .sub{color:var(--ink);max-width:80ch}
+.gblock .hint{max-width:90ch}
+.plot{position:relative;min-width:0}
+.plot svg{display:block;max-width:100%;height:auto;overflow:visible;touch-action:pan-y}
+.key{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--ink2)}
+.key span{display:inline-flex;align-items:center;gap:6px}
+.key i,.gtip i{width:18px;height:0;border-top:2px solid var(--ink);display:inline-block;flex:none}
+.key i.thin{border-top-width:1px;border-top-color:var(--undef)}
+.ax{font:12px var(--sans);fill:var(--ink3)}
+.grid{stroke:var(--rule);stroke-width:1}
+.ctx{stroke:var(--undef);stroke-width:1;fill:none;opacity:.4}
+.ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.cross{stroke:var(--ink3);stroke-width:1}
+.endl{font:600 12px var(--sans);fill:var(--ink)}
+.gtip{position:absolute;pointer-events:none;color:var(--ink);background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:6px 9px;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.14);z-index:2;display:flex;flex-direction:column;gap:2px;min-width:150px}
+.gtip .tr{display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:8px;align-items:center;color:var(--ink2)}
+.gtip .v{color:var(--ink);font-variant-numeric:tabular-nums;font-weight:600}
+.mrows{display:flex;flex-direction:column;gap:12px}
+.mrow{display:grid;grid-template-columns:minmax(0,270px) minmax(0,1fr);gap:6px 18px;align-items:start}
+@media (max-width:700px){.mrow{grid-template-columns:minmax(0,1fr)}}
+.mrow .lbl{font-size:14px;color:var(--ink2)}
+.mrow .lbl b{display:block;color:var(--ink);font-variant-numeric:tabular-nums}
+.tiles{display:flex;flex-wrap:wrap;gap:4px}
+.tile{font:600 11px var(--sans);display:inline-flex;align-items:center;gap:5px;padding:3px 7px 3px 4px;border:1px solid var(--rule);border-radius:4px;background:var(--panel);color:var(--ink);cursor:pointer}
+.tile:hover{border-color:var(--ink3)}
+.tile.me{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.tile .sw{width:14px;height:12px}
+.tl{display:flex;flex-direction:column}
+.tl details{padding:8px 0}
+.tl summary{display:grid;grid-template-columns:11ch minmax(0,1fr);gap:10px;font-weight:500;list-style:none}
+.tl summary::-webkit-details-marker{display:none}
+.tl .d{font-family:var(--mono);font-size:12px;color:var(--ink3);padding-top:2px}
+.tl details[open] summary{font-weight:700}
+.tl .body{margin:6px 0 4px;padding-left:calc(11ch + 10px);max-width:90ch}
+@media (max-width:560px){.tl summary{grid-template-columns:minmax(0,1fr);gap:0}.tl .body{padding-left:0}}
+.evdot{fill:var(--ink2);stroke:var(--bg);stroke-width:2;cursor:pointer}
+.evdot.on{fill:var(--c1)}
+#fintab td,#fintab th{font-variant-numeric:tabular-nums;white-space:nowrap}
 footer{font-size:13px;color:var(--ink3);border-top:1px solid var(--rule);padding-top:12px;max-width:80ch}
 @media (prefers-reduced-motion:no-preference){.st{transition:opacity .15s}}
 </style>
@@ -185,29 +224,47 @@ footer{font-size:13px;color:var(--ink3);border-top:1px solid var(--rule);padding
     <aside class="panel" id="profile" aria-live="polite"></aside>
   </div>
 
-  <section class="col block" id="compare">
-    <div class="row" style="justify-content:space-between">
-      <h2 id="ovh">National overview</h2>
-      <div class="row"><label for="pick">Show</label><select id="pick"></select></div>
+  <section class="col block" id="graphs">
+    <h2>Graphs</h2>
+
+    <div class="gblock">
+      <h3>Free-meal laws and how poverty is counted for funding</h3>
+      <p class="sub" id="mealsfind"></p>
+      <div class="mrows" id="mealsrows"></div>
+      <div class="key" id="mealskey"></div>
+      <p class="hint">Each tile is one state, marked by how it counts students in poverty for funding in school year 2025-26. The categories are a draft. Choose a tile to open that state.</p>
     </div>
-    <p class="hint" id="counts">Every number in this section is a number of states, out of 51: the 50 states and the District of Columbia.</p>
-    <div class="cards" id="cards"></div>
-    <p class="summary" id="summary"></p>
-    <div class="charts" id="charts"></div>
-    <p class="hint">Choose a bar to see those states on the map.</p>
-    <details><summary>More comparisons: when meals are free for everyone, and how states pay for schools</summary>
+
+    <div class="gblock">
+      <h3>School revenue per student, fiscal years 2010 to 2024</h3>
+      <p class="hint">Revenue from state, local and federal sources together, divided by enrollment. Dollars are as reported each year and are not adjusted for inflation, so part of every rise is rising prices. Grey lines are the other states. Choose a state on the map, or a line here, to compare it with the United States.</p>
+      <div class="key" id="ppkey"></div>
+      <div class="plot" id="ppplot"></div>
+    </div>
+
+    <div class="gblock">
+      <h3 id="shh">Where school money comes from</h3>
+      <p class="hint" id="shsub"></p>
+      <div class="key" id="shkey"></div>
+      <div class="plot" id="shplot"></div>
+      <p class="hint" id="shnote" hidden></p>
+    </div>
+
+    <details><summary>The numbers behind these two graphs, and where they come from</summary>
       <div class="col" style="margin-top:10px">
-        <div class="charts" id="charts2"></div>
-        <p class="fact" id="mlist" hidden></p>
-        <p class="hint">Choose a bar to list its states.</p>
+        <div class="scroll"><table id="fintab"></table></div>
+        <p class="hint">Source: U.S. Census Bureau, Annual Survey of School System Finances, tables for fiscal years 2010 to 2024: Table 1 for revenue and Table 19 for enrollment. The per-student figure is total revenue divided by enrollment, worked out for this page. The figures were read from the Census workbooks by a script, not typed.</p>
+        <ul class="srcs" id="finsrc"></ul>
       </div>
     </details>
-    <details><summary>Two states side by side</summary>
-      <div class="col" style="margin-top:10px">
-        <div class="row"><label for="sa">First</label><select id="sa"></select><label for="sb">Second</label><select id="sb"></select></div>
-        <div class="scroll"><table id="side"></table></div>
-      </div>
-    </details>
+
+    <div class="gblock">
+      <h3>Federal rule changes since 2010</h3>
+      <p class="hint">Federal laws and rules on school meals, and on reporting results for low-income students. Each is placed at the date it took effect where the source gives one, and otherwise at the date of the law or rule. Choose one to read more.</p>
+      <div class="plot" id="tlplot"></div>
+      <div class="tl" id="tllist"></div>
+    </div>
+
     <details><summary>All states in one table</summary>
       <div class="col" style="margin-top:10px">
         <p class="hint">Choose a column heading to sort. Choose a row to open that state.</p>
@@ -230,7 +287,7 @@ footer{font-size:13px;color:var(--ink3);border-top:1px solid var(--rule);padding
 <div class="tip" id="tip" hidden></div>
 
 <script>
-const DATA=__DATA__, PATHS=__PATHS__, CSV=__CSV__;
+const DATA=__DATA__, PATHS=__PATHS__, CSV=__CSV__, GRAPHS=__GRAPHS__;
 const PLAIN={
  F:{FRL:['Students who qualify for free or reduced-price school meals','Based on family income, usually from a form families fill out for the school lunch program.'],
     MIX:['School meals plus another measure','The state looks at who qualifies for school meals and at a second source, such as public benefits or Census figures.'],
@@ -351,7 +408,7 @@ function line(s,v){
   det.appendChild(body);return det}
 function profile(){const P=$('profile');P.textContent='';
   if(!sel){P.appendChild(el('h2',{},'Choose a state'));P.appendChild(el('p',{class:'lead'},view.about));
-    P.appendChild(el('p',{class:'hint'},'Choosing a state zooms the map to it and shows its answers to five questions. Or scroll down for the national overview.'));return}
+    P.appendChild(el('p',{class:'hint'},'Choosing a state zooms the map to it and shows its answers to five questions. Or scroll down for the graphs.'));return}
   const s=byAb[sel];
   const top=el('div',{class:'row',style:'justify-content:space-between'});top.appendChild(el('h2',{},s.state));
   const x=el('button',{class:'btn',type:'button'},'Back to the map');x.addEventListener('click',closeState);top.appendChild(x);P.appendChild(top);
@@ -363,49 +420,105 @@ function profile(){const P=$('profile');P.textContent='';
 function openState(ab,quiet){if(sel===ab){closeState();return}sel=ab;hi=null;zoomTo(boxFor(ab));render();
   if(!quiet&&window.innerWidth<=860)$('profile').scrollIntoView({block:'nearest',behavior:'smooth'})}
 function closeState(){sel=null;zoomTo([0,0,975,610]);render()}
-function render(){paint();buildLegend();profile();overview();$('about').textContent=view.about}
+function render(){paint();buildLegend();profile();graphs();$('about').textContent=view.about}
 document.addEventListener('keydown',e=>{if(sel&&e.key==='Escape')closeState()});
 $('back').addEventListener('click',closeState);
 
 /* compare */
 function fillSel(id,opts,val){const s=$(id);opts.forEach(([v,t])=>s.appendChild(el('option',{value:v},t)));s.value=val}
-function overview(){
-  const s=sel?byAb[sel]:null,n=S.length,cnt=(v,c)=>S.filter(x=>x[v.k]===c).length;
-  $('ovh').textContent=s?s.state+' compared with all states':'National overview';$('pick').value=sel||'';
-  const C=$('cards');C.textContent='';
-  const card=(big,label)=>{const d=el('div',{class:'card'});const b=el('b',{},String(big));b.appendChild(el('small',{},big===1?'state':'states'));d.appendChild(b);d.appendChild(el('span',{class:'l'},label));C.appendChild(d)};
-  const F=V('funding'),A=V('accountability'),X=V('cep'),M=V('mech');
-  if(!s){
-    const withF=n-cnt(F,'NONE'),top=v=>v.order.map(c=>[c,cnt(v,c)]).sort((a,b)=>b[1]-a[1])[0];
-        card(withF,'add money for student poverty in their main funding formula');
-    card(cnt(F,'FRL'),'count poverty by who qualifies for free or reduced-price school meals');
-    card(cnt(F,'DC')+cnt(F,'INC'),'count it from public benefits, family income or Census figures instead');
-    card(cnt(M,'W1'),'count each student in poverty as more than one student');
-    card(cnt(A,'FRL'),'use school meal eligibility alone to decide who is low-income on report cards');
-    card(S.filter(x=>x.cM==='UNI').length,'have a state law giving free meals to all students');
-    const tf=top(F),ta=top(A);
-    const lc=x=>x.charAt(0).toLowerCase()+x.slice(1);
-    $('summary').textContent='Of '+n+' (50 states and the District of Columbia), '+withF+' add money for student poverty in their main funding formula. The most common way to count poverty for funding: '+lc(DATA.labels.F[tf[0]])+' ('+nStates(tf[1])+'). The most common way on report cards: '+lc(DATA.labels.A[ta[0]])+' ('+nStates(ta[1])+'). For '+nStates(cnt(X,'NF'))+', the sources read do not say what the state does when a school serves free meals to everyone. Choose a state above to see how it compares.';
-  }else{
-    VIEWS.forEach(v=>{const d=el('div',{class:'card'});d.appendChild(el('p',{class:'eyebrow'},v.short));const c=el('div',{class:'cat'});c.appendChild(sw(v.fill[s[v.k]]));c.appendChild(el('span',{},LAB(v,s)));d.appendChild(c);
-      const o=cnt(v,s[v.k])-1;d.appendChild(el('span',{class:'l'},o?(o+' other '+(o===1?'state does':'states do')+' the same'):'No other state does this'));C.appendChild(d)});
-    const twins=S.filter(o=>o.abbr!==s.abbr&&VIEWS.every(v=>o[v.k]===s[v.k])).map(o=>o.state);
-    $('summary').textContent=twins.length?('States that answer all five questions the same way as '+s.state+': '+twins.join(', ')+'.'):('No other state answers all five questions the same way as '+s.state+'.');
-  }
-  const chart=(v,clickable)=>{const d=el('div',{class:'chart'});d.appendChild(el('h3',{},ASK[v.id]));const max=Math.max(...v.order.map(c=>cnt(v,c)));
-    v.order.forEach(c=>{const k=cnt(v,c);if(!k)return;const me=s&&s[v.k]===c;const names=S.filter(x=>x[v.k]===c).map(x=>x.state).join(', ');
-      const b=el('button',{type:'button',class:'barrow'+(me?' me':''),title:names,'aria-label':DATA.labels[v.L][c]+', '+nStates(k)+(me?', includes '+s.state:'')});
-      b.appendChild(el('span',{},DATA.labels[v.L][c]+(me?' \u2190 '+s.state:'')));const tr=el('span',{class:'track'});const i=el('i');i.style.width=(100*k/max)+'%';tr.appendChild(i);b.appendChild(tr);b.appendChild(el('span',{class:'n'},nStates(k)));
-      b.addEventListener('click',()=>{if(clickable){sel=null;zoomTo([0,0,975,610]);view=v;hi=c;render();$('tabs').scrollIntoView({block:'start',behavior:'smooth'})}else{const x=$('mlist');x.hidden=false;x.textContent=DATA.labels[v.L][c]+': '+names+'.'}});d.appendChild(b)});
-    return d};
-  const W=$('charts');W.textContent='';W.classList.toggle('nat',!s);MAPV.forEach(v=>W.appendChild(chart(v,true)));
-  const W2=$('charts2');W2.textContent='';W2.classList.toggle('nat',!s);[VIEWS[2]].concat(MONEY).forEach(v=>W2.appendChild(chart(v,false)));
+const FIN=GRAPHS.fin, YRS=FIN.y;
+const SV=(t,a={},txt)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;return e};
+const usd=n=>'$'+Math.round(n).toLocaleString('en-US');
+function pick(ab){if(sel===ab)return;sel=ab;hi=null;zoomTo(boxFor(ab));render()}
+function keyRow(host,items){host.textContent='';items.forEach(([name,color,thin])=>{const sp=el('span');const i=el('i',thin?{class:'thin'}:{});if(!thin)i.style.borderTopColor=color;sp.appendChild(i);sp.appendChild(el('span',{},name));host.appendChild(sp)})}
+function lineChart(host,o){
+  const W=Math.max(280,Math.floor(host.clientWidth||600)),narrow=W<560,H=narrow?250:320;
+  const m={t:12,r:narrow?14:150,b:26,l:narrow?46:60},iw=W-m.l-m.r,ih=H-m.t-m.b,n=YRS.length;
+  const x=i=>m.l+iw*i/(n-1),y=v=>m.t+ih*(1-v/o.ymax);
+  host.textContent='';
+  const svg=SV('svg',{viewBox:'0 0 '+W+' '+H,width:W,height:H,role:'img','aria-label':o.label});
+  o.ticks.forEach(t=>{svg.appendChild(SV('line',{class:'grid',x1:m.l,x2:m.l+iw,y1:y(t),y2:y(t)}));svg.appendChild(SV('text',{class:'ax',x:m.l-8,y:y(t)+4,'text-anchor':'end'},o.afmt(t)))});
+  const step=narrow?4:2;YRS.forEach((yr,i)=>{if((n-1-i)%step===0)svg.appendChild(SV('text',{class:'ax',x:x(i),y:H-6,'text-anchor':'middle'},String(yr)))});
+  const path=vals=>{let d='',pen=false;vals.forEach((v,i)=>{if(v==null){pen=false;return}d+=(pen?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1);pen=true});return d};
+  (o.ctx||[]).forEach(c=>svg.appendChild(SV('path',{class:'ctx',d:path(c.vals)})));
+  const hov=SV('path',{class:'ln',stroke:'var(--ink3)',d:''});svg.appendChild(hov);
+  o.series.forEach(sr=>svg.appendChild(SV('path',{class:'ln',stroke:sr.color,d:path(sr.vals)})));
+  if(!narrow){const L=o.series.map(sr=>{let i=n-1;while(i>=0&&sr.vals[i]==null)i--;return i<0?null:{sr,i,yy:y(sr.vals[i])}}).filter(Boolean).sort((p,q)=>p.yy-q.yy);
+    for(let k=1;k<L.length;k++)if(L[k].yy-L[k-1].yy<15)L[k].yy=L[k-1].yy+15;
+    L.forEach(l=>svg.appendChild(SV('text',{class:'endl',x:x(l.i)+9,y:l.yy+4},l.sr.name)))}
+  const cross=SV('line',{class:'cross',y1:m.t,y2:m.t+ih,x1:0,x2:0,visibility:'hidden'});svg.appendChild(cross);
+  const dots=o.series.map(sr=>{const c=SV('circle',{r:4.5,fill:sr.color,stroke:'var(--bg)','stroke-width':2,visibility:'hidden'});svg.appendChild(c);return c});
+  const tip=el('div',{class:'gtip',hidden:''});host.appendChild(svg);host.appendChild(tip);
+  let near=null;
+  const move=ev=>{const r=svg.getBoundingClientRect(),px=(ev.clientX-r.left)*W/r.width,py=(ev.clientY-r.top)*H/r.height;
+    const i=Math.max(0,Math.min(n-1,Math.round((px-m.l)/iw*(n-1))));
+    cross.setAttribute('x1',x(i));cross.setAttribute('x2',x(i));cross.setAttribute('visibility','visible');
+    o.series.forEach((sr,k)=>{const v=sr.vals[i];if(v==null){dots[k].setAttribute('visibility','hidden')}else{dots[k].setAttribute('cx',x(i));dots[k].setAttribute('cy',y(v));dots[k].setAttribute('visibility','visible')}});
+    near=null;if(o.ctx){let best=12;o.ctx.forEach(c=>{const v=c.vals[i];if(v==null||o.series.some(sr=>sr.ab===c.ab))return;const dd=Math.abs(y(v)-py);if(dd<best){best=dd;near=c}})}
+    hov.setAttribute('d',near?path(near.vals):'');
+    tip.textContent='';tip.appendChild(el('b',{},o.xlab(i)));
+    const rows=o.series.map(sr=>[sr.name,sr.vals[i],sr.color]);if(near)rows.push([near.name,near.vals[i],'var(--ink3)']);
+    rows.forEach(([nm,v,c])=>{const d=el('div',{class:'tr'});const k=el('i');k.style.borderTopColor=c;d.appendChild(k);d.appendChild(el('span',{},nm));d.appendChild(el('span',{class:'v'},v==null?'not available':o.yfmt(v)));tip.appendChild(d)});
+    tip.hidden=false;const tw=tip.offsetWidth,cx=x(i)/W*r.width;let left=cx+12;if(left+tw>r.width)left=cx-tw-12;tip.style.left=Math.max(0,left)+'px';tip.style.top=m.t+'px';
+    svg.style.cursor=near&&o.onPick?'pointer':'default'};
+  const leave=()=>{cross.setAttribute('visibility','hidden');dots.forEach(d=>d.setAttribute('visibility','hidden'));tip.hidden=true;hov.setAttribute('d','');near=null};
+  svg.addEventListener('pointermove',move);svg.addEventListener('pointerleave',leave);
+  svg.addEventListener('click',ev=>{move(ev);if(near&&o.onPick){const ab=near.ab;leave();o.onPick(ab)}});
 }
-function side(){const a=byAb[$('sa').value],b=byAb[$('sb').value],T=$('side');T.textContent='';
-  const hr=el('tr');hr.appendChild(el('th',{},''));hr.appendChild(el('th',{},a.state));hr.appendChild(el('th',{},b.state));T.appendChild(hr);
-  VIEWS.forEach(v=>{const tr=el('tr');tr.appendChild(el('td',{},v.short));[a,b].forEach(s=>{const td=el('td');td.appendChild(chip(v,s));const f=v.fact(s);if(f&&v.id!=='cep')td.appendChild(el('div',{class:'hint'},f));tr.appendChild(td)});T.appendChild(tr)});
-  const tr=el('tr');tr.appendChild(el('td',{},'State law on free meals'));[a,b].forEach(s=>tr.appendChild(el('td',{},DATA.labels.M[s.cM])));T.appendChild(tr);
+function mealsChart(){
+  const F=V('funding'),order=['UNI','EXP','PART','NONE'],R=$('mealsrows');R.textContent='';
+  order.forEach(c=>{const st=S.filter(x=>x.cM===c).sort((a,b)=>(F.order.indexOf(a.cF)-F.order.indexOf(b.cF))||(a.state<b.state?-1:1));if(!st.length)return;
+    const row=el('div',{class:'mrow'});const lb=el('div',{class:'lbl'});lb.appendChild(el('b',{},nStates(st.length)));lb.appendChild(el('span',{},DATA.labels.M[c]));row.appendChild(lb);
+    const t=el('div',{class:'tiles'});st.forEach(x=>{const b=el('button',{type:'button',class:'tile'+(sel===x.abbr?' me':''),title:x.state+': '+LAB(F,x),'aria-label':x.state+', '+LAB(F,x)});b.appendChild(sw(F.fill[x.cF]));b.appendChild(el('span',{},x.abbr));
+      b.addEventListener('click',()=>pick(x.abbr));t.appendChild(b)});row.appendChild(t);R.appendChild(row)});
+  const K=$('mealskey');K.textContent='';F.order.forEach(c=>{if(!S.some(x=>x.cF===c))return;const sp=el('span');sp.appendChild(sw(F.fill[c]));sp.appendChild(el('span',{},DATA.labels.F[c]));K.appendChild(sp)});
+  const U=S.filter(x=>x.cM==='UNI'),a=U.filter(x=>x.cF==='FRL').length,b=U.filter(x=>x.cF==='MIX').length,o=U.filter(x=>x.cF==='DC'||x.cF==='INC').length,r=U.length-a-b-o;
+  $('mealsfind').textContent='Of the '+U.length+' states with a law giving free meals to all students, '+a+' count poverty for funding by school meal eligibility alone and '+b+' by school meals plus another measure. '+o+' use public benefits, family income or Census figures instead.'+(r?' For the other '+r+', no count was found or the main formula has none.':'');
 }
+function graphs(){
+  const s=sel?byAb[sel]:null,who=s?FIN.st[s.abbr]:FIN.US,name=s?s.state:'United States';
+  mealsChart();
+  const ctx=S.map(x=>({ab:x.abbr,name:x.state,vals:FIN.st[x.abbr].pp}));
+  const ser=[{ab:'US',name:'United States',color:'var(--ink)',vals:FIN.US.pp}];if(s)ser.push({ab:s.abbr,name:s.state,color:'var(--c1)',vals:FIN.st[s.abbr].pp});
+  keyRow($('ppkey'),ser.map(x=>[x.name,x.color]).concat([[s?'Other states':'Each state','',true]]));
+  lineChart($('ppplot'),{label:'Line chart of school revenue per student by fiscal year, 2010 to 2024',series:ser,ctx:ctx,ymax:40000,ticks:[0,10000,20000,30000,40000],afmt:usd,yfmt:usd,xlab:i=>'Fiscal year '+YRS[i],onPick:pick});
+  const sh=[{ab:'s',name:'State',color:'var(--c1)',vals:who.s},{ab:'l',name:'Local',color:'var(--c2)',vals:who.l},{ab:'f',name:'Federal',color:'var(--c3)',vals:who.f}].filter(x=>x.vals.some(v=>v!=null));
+  $('shh').textContent='Where school money comes from: '+name;
+  $('shsub').textContent='Share of school revenue from state, local and federal sources, fiscal years 2010 to 2024.'+(s?'':' Choose a state on the map to see its shares.');
+  keyRow($('shkey'),sh.map(x=>[x.name,x.color]));
+  lineChart($('shplot'),{label:'Line chart of the state, local and federal share of school revenue, '+name,series:sh,ymax:100,ticks:[0,25,50,75,100],afmt:v=>v+'%',yfmt:v=>v.toFixed(1)+'%',xlab:i=>'Fiscal year '+YRS[i]});
+  const notes=[];if(s&&sh.length<3)notes.push('The Census tables give no state revenue figure for '+(s.state==='District of Columbia'?'the District of Columbia':s.state)+', so there is no state line.');
+  if(who.gap)notes.push(name+', fiscal year '+who.gap.join(', ')+': the state, local and federal figures in the Census table do not add up to its total, so no shares are shown for that year.');
+  $('shnote').hidden=!notes.length;$('shnote').textContent=notes.join(' ');
+  const T=$('fintab');T.textContent='';const hr=el('tr');['Fiscal year','Revenue per student, '+name].concat(s?['Revenue per student, United States']:[]).concat(['State share','Local share','Federal share']).forEach(h=>hr.appendChild(el('th',{},h)));T.appendChild(hr);
+  const pc=v=>v==null?'not available':v.toFixed(1)+'%';
+  YRS.forEach((yr,i)=>{const tr=el('tr');[String(yr),usd(who.pp[i])].concat(s?[usd(FIN.US.pp[i])]:[]).concat([pc(who.s[i]),pc(who.l[i]),pc(who.f[i])]).forEach(c=>tr.appendChild(el('td',{},c)));T.appendChild(tr)});
+  timeline();
+}
+const fmtDate=d=>{const [y,mo,da]=d.split('-').map(Number);return new Date(y,mo-1,da).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})};
+function timeline(){
+  const host=$('tlplot'),E=GRAPHS.events,W=Math.max(280,Math.floor(host.clientWidth||600)),narrow=W<560,m={l:22,r:22};
+  const y0=2010,y1=2025,iw=W-m.l-m.r,fx=d=>{const [y,mo,da]=d.split('-').map(Number);return m.l+iw*((y+(mo-1)/12+(da-1)/365)-y0)/(y1-y0)};
+  let last=-99,lvl=0;const pos=E.map(e=>{const xx=fx(e.date);if(xx-last<13){lvl++}else{lvl=0}last=xx;return {e,x:xx,lvl}});
+  const top=Math.max(...pos.map(p=>p.lvl)),base=14+top*13,H=base+34;
+  host.textContent='';const svg=SV('svg',{viewBox:'0 0 '+W+' '+H,width:W,height:H,role:'group','aria-label':'Timeline of '+E.length+' federal rule changes, 2010 to 2024'});
+  svg.appendChild(SV('line',{class:'grid',x1:m.l,x2:m.l+iw,y1:base+10,y2:base+10}));
+  for(let yr=y0;yr<=y1;yr++){const xx=m.l+iw*(yr-y0)/(y1-y0);svg.appendChild(SV('line',{class:'grid',x1:xx,x2:xx,y1:base+6,y2:base+14}));if((yr-y0)%(narrow?5:1)===0)svg.appendChild(SV('text',{class:'ax',x:xx,y:H-4,'text-anchor':'middle'},String(yr)))}
+  pos.forEach(p=>{const c=SV('circle',{class:'evdot',id:'dot-'+p.e.id,cx:p.x,cy:base-p.lvl*13,r:5,tabindex:'0',role:'button','aria-label':fmtDate(p.e.date)+': '+p.e.label});c.appendChild(SV('title',{},fmtDate(p.e.date)+': '+p.e.label));
+    const go=()=>{const d=$('ev-'+p.e.id);d.open=true;d.scrollIntoView({block:'nearest',behavior:'smooth'})};c.addEventListener('click',go);c.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go()}});svg.appendChild(c)});
+  host.appendChild(svg);
+  const L=$('tllist');if(!L.childElementCount){E.forEach(e=>{const d=el('details',{id:'ev-'+e.id});const sm=el('summary');sm.appendChild(el('span',{class:'d'},fmtDate(e.date)));sm.appendChild(el('span',{},e.label));d.appendChild(sm);
+      const b=el('div',{class:'body'});const dl=el('dl');const add=(t,node)=>{const w=el('div');w.appendChild(el('dt',{},t));w.appendChild(node);dl.appendChild(w)};
+      add('Our summary of the source',el('dd',{},e.desc));
+      add('Date shown',el('dd',{},e.basis==='took effect'?('Took effect '+fmtDate(e.date)+(e.event_date&&e.event_date!==e.date?'. Law or rule dated '+fmtDate(e.event_date)+'.':'.')):('Law or rule dated '+fmtDate(e.date)+'. No separate effective date in the source read.')));
+      add('Cited as',el('dd',{},e.cite));
+      const dd=el('dd');dd.appendChild(el('a',{href:e.src.url,target:'_blank',rel:'noopener'},e.src.title));dd.appendChild(el('span',{class:'hint'},' · '+e.src.issuer));dd.appendChild(el('span',{class:'mono'},' '+e.src.id));add('Source read',dd);
+      add('How this was checked',el('dd',{},e.src.status));b.appendChild(dl);d.appendChild(b);
+      d.addEventListener('toggle',()=>{const c=$('dot-'+e.id);if(c)c.classList.toggle('on',d.open)});L.appendChild(d)})}
+  E.forEach(e=>{const c=$('dot-'+e.id),d=$('ev-'+e.id);if(c&&d&&d.open)c.classList.add('on')});
+}
+(function(){const U=$('finsrc');GRAPHS.finsrc.forEach(x=>{const li=el('li');li.appendChild(el('a',{href:x.url,target:'_blank',rel:'noopener'},'Census workbook, fiscal year '+x.fy+' (spreadsheet file)'));li.appendChild(el('span',{class:'mono'},' '+x.id));U.appendChild(li)})})();
+let rsz=null;window.addEventListener('resize',()=>{clearTimeout(rsz);rsz=setTimeout(graphs,150)});
 let sortKey='state',sortDir=1;
 function allTable(){const T=$('all');T.textContent='';const hr=el('tr');
   [['state','State']].concat(VIEWS.map(v=>[v.k,v.short])).forEach(([k,t])=>{const th=el('th',{'data-sort':k,tabindex:'0','aria-sort':sortKey===k?(sortDir>0?'ascending':'descending'):false},t+(sortKey===k?(sortDir>0?' ↑':' ↓'):''));
@@ -414,13 +527,9 @@ function allTable(){const T=$('all');T.textContent='';const hr=el('tr');
   S.slice().sort((a,b)=>val(a)<val(b)?-sortDir:sortDir).forEach(s=>{const tr=el('tr',{class:'pick'});tr.appendChild(el('td',{},s.state));VIEWS.forEach(v=>{const td=el('td');td.appendChild(chip(v,s));tr.appendChild(td)});
     tr.addEventListener('click',()=>{if(sel!==s.abbr)openState(s.abbr);$('map').scrollIntoView({block:'start',behavior:'smooth'})});T.appendChild(tr)});
 }
-fillSel('pick',[['','National overview']].concat(S.map(s=>[s.abbr,s.state])),'');
-$('pick').addEventListener('change',e=>{const ab=e.target.value;if(!ab){closeState();return}sel=ab;hi=null;zoomTo(boxFor(ab));render()});
-fillSel('sa',S.map(s=>[s.abbr,s.state]),'MS');fillSel('sb',S.map(s=>[s.abbr,s.state]),'TN');
-['sa','sb'].forEach(i=>$(i).addEventListener('change',side));
 
 $('csvbtn').addEventListener('click',()=>{const b=$('csvbox');b.hidden=!b.hidden;$('csvbtn').setAttribute('aria-expanded',!b.hidden);if(!b.hidden)$('csvtext').value=CSV});
 $('copybtn').addEventListener('click',()=>{const done=()=>{$('copymsg').textContent='Copied'};const s2=()=>{$('csvtext').select();$('copymsg').textContent='Selected. Press copy on your keyboard.'};
   try{navigator.clipboard.writeText(CSV).then(done,s2)}catch(e){s2()}});
-buildMap();buildTabs();side();allTable();render();
+buildMap();buildTabs();allTable();render();
 </script>
