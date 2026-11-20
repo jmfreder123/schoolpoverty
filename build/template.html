@@ -145,16 +145,6 @@ section.block{border-top:1px solid var(--rule);padding-top:18px}
 .gtip{position:absolute;pointer-events:none;color:var(--ink);background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:6px 9px;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,.14);z-index:2;display:flex;flex-direction:column;gap:2px;min-width:150px}
 .gtip .tr{display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:8px;align-items:center;color:var(--ink2)}
 .gtip .v{color:var(--ink);font-variant-numeric:tabular-nums;font-weight:600}
-.mrows{display:flex;flex-direction:column;gap:12px}
-.mrow{display:grid;grid-template-columns:minmax(0,270px) minmax(0,1fr);gap:6px 18px;align-items:start}
-@media (max-width:700px){.mrow{grid-template-columns:minmax(0,1fr)}}
-.mrow .lbl{font-size:14px;color:var(--ink2)}
-.mrow .lbl b{display:block;color:var(--ink);font-variant-numeric:tabular-nums}
-.tiles{display:flex;flex-wrap:wrap;gap:4px}
-.tile{font:600 11px var(--sans);display:inline-flex;align-items:center;gap:5px;padding:3px 7px 3px 4px;border:1px solid var(--rule);border-radius:4px;background:var(--panel);color:var(--ink);cursor:pointer}
-.tile:hover{border-color:var(--ink3)}
-.tile.me{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
-.tile .sw{width:14px;height:12px}
 .tl{display:flex;flex-direction:column}
 .tl details{padding:8px 0}
 .tl summary{display:grid;grid-template-columns:11ch minmax(0,1fr);gap:10px;font-weight:500;list-style:none}
@@ -226,14 +216,6 @@ footer{font-size:13px;color:var(--ink3);border-top:1px solid var(--rule);padding
 
   <section class="col block" id="graphs">
     <h2>Graphs</h2>
-
-    <div class="gblock">
-      <h3>Free-meal laws and how poverty is counted for funding</h3>
-      <p class="sub" id="mealsfind"></p>
-      <div class="mrows" id="mealsrows"></div>
-      <div class="key" id="mealskey"></div>
-      <p class="hint">Each tile is one state, marked by how it counts students in poverty for funding in school year 2025-26. The categories are a draft. Choose a tile to open that state.</p>
-    </div>
 
     <div class="gblock">
       <h3>School revenue per student, fiscal years 2010 to 2024</h3>
@@ -465,19 +447,8 @@ function lineChart(host,o){
   svg.addEventListener('pointermove',move);svg.addEventListener('pointerleave',leave);
   svg.addEventListener('click',ev=>{move(ev);if(near&&o.onPick){const ab=near.ab;leave();o.onPick(ab)}});
 }
-function mealsChart(){
-  const F=V('funding'),order=['UNI','EXP','PART','NONE'],R=$('mealsrows');R.textContent='';
-  order.forEach(c=>{const st=S.filter(x=>x.cM===c).sort((a,b)=>(F.order.indexOf(a.cF)-F.order.indexOf(b.cF))||(a.state<b.state?-1:1));if(!st.length)return;
-    const row=el('div',{class:'mrow'});const lb=el('div',{class:'lbl'});lb.appendChild(el('b',{},nStates(st.length)));lb.appendChild(el('span',{},DATA.labels.M[c]));row.appendChild(lb);
-    const t=el('div',{class:'tiles'});st.forEach(x=>{const b=el('button',{type:'button',class:'tile'+(sel===x.abbr?' me':''),title:x.state+': '+LAB(F,x),'aria-label':x.state+', '+LAB(F,x)});b.appendChild(sw(F.fill[x.cF]));b.appendChild(el('span',{},x.abbr));
-      b.addEventListener('click',()=>pick(x.abbr));t.appendChild(b)});row.appendChild(t);R.appendChild(row)});
-  const K=$('mealskey');K.textContent='';F.order.forEach(c=>{if(!S.some(x=>x.cF===c))return;const sp=el('span');sp.appendChild(sw(F.fill[c]));sp.appendChild(el('span',{},DATA.labels.F[c]));K.appendChild(sp)});
-  const U=S.filter(x=>x.cM==='UNI'),a=U.filter(x=>x.cF==='FRL').length,b=U.filter(x=>x.cF==='MIX').length,o=U.filter(x=>x.cF==='DC'||x.cF==='INC').length,r=U.length-a-b-o;
-  $('mealsfind').textContent='Of the '+U.length+' states with a law giving free meals to all students, '+a+' count poverty for funding by school meal eligibility alone and '+b+' by school meals plus another measure. '+o+' use public benefits, family income or Census figures instead.'+(r?' For the other '+r+', no count was found or the main formula has none.':'');
-}
 function graphs(){
   const s=sel?byAb[sel]:null,who=s?FIN.st[s.abbr]:FIN.US,name=s?s.state:'United States';
-  mealsChart();
   const ctx=S.map(x=>({ab:x.abbr,name:x.state,vals:FIN.st[x.abbr].pp}));
   const ser=[{ab:'US',name:'United States',color:'var(--ink)',vals:FIN.US.pp}];if(s)ser.push({ab:s.abbr,name:s.state,color:'var(--c1)',vals:FIN.st[s.abbr].pp});
   keyRow($('ppkey'),ser.map(x=>[x.name,x.color]).concat([[s?'Other states':'Each state','',true]]));
