@@ -491,7 +491,7 @@ function timeline(){
 }
 (function(){const U=$('finsrc');GRAPHS.finsrc.forEach(x=>{const li=el('li');li.appendChild(el('a',{href:x.url,target:'_blank',rel:'noopener'},'Census workbook, fiscal year '+x.fy+' (spreadsheet file)'));li.appendChild(el('span',{class:'mono'},' '+x.id));U.appendChild(li)});
   GRAPHS.cpisrc.urls.forEach((u,i)=>{const li=el('li');li.appendChild(el('a',{href:u,target:'_blank',rel:'noopener'},'BLS price index, monthly values '+(i?'2019 to 2024':'2009 to 2018')+' (data file)'));li.appendChild(el('span',{class:'mono'},' '+GRAPHS.cpisrc.id));U.appendChild(li)});
-  {const x=GRAPHS.cpisrc.about,li=el('li');li.appendChild(el('a',{href:x.url,target:'_blank',rel:'noopener'},x.title));li.appendChild(el('span',{class:'mono'},' '+x.id));U.appendChild(li)}})();
+  GRAPHS.cpisrc.about.forEach(x=>{const li=el('li');li.appendChild(el('a',{href:x.url,target:'_blank',rel:'noopener'},x.title));li.appendChild(el('span',{class:'mono'},' '+x.id));U.appendChild(li)})})();
 let rsz=null;window.addEventListener('resize',()=>{clearTimeout(rsz);rsz=setTimeout(graphs,150)});
 let sortKey='state',sortDir=1;
 function allTable(){const T=$('all');T.textContent='';const hr=el('tr');
