@@ -30,7 +30,7 @@ FIX={
  'NC-D008':('https://web.archive.org/web/20260416161459/https://www.dpi.nc.gov/documents/fbs/allotments/state-allotment-policy-manual-fy-2026pdf/download',ARCH%'April 16, 2026'),
  'SD-D010':('https://web.archive.org/web/20260717020713/https://doe.sd.gov/reportcard/documents/0326-TechManual.pdf',ARCH%'July 17, 2026'),
  'ME-D009':('https://web.archive.org/web/20250206192642/https://www.maine.gov/doe/sites/maine.gov.doe/files/inline-files/ME_Amendment%20_VF_2.23.2024.pdf',ARCH%'February 6, 2025'),
- 'WV-D015':('','the address no longer works and no other copy was found'),
+ 'WV-D015':('','the address no longer works; the U.S. Department of Education copy of this plan is listed here as WV-D016'),
 }
 for k,(u,n) in FIX.items():
     P[k]['url']=u
@@ -54,6 +54,16 @@ for h in head:
 DROP={('Vermont','2'):['VT-D006']}   # never read; address gone; removed from accountability row 65 on 2026-11-20
 for (st,tab),ids_ in DROP.items():
     e=out[st][tab]; n=len(e['sources']); e['sources']=[x for x in e['sources'] if x['id'] not in ids_]; assert len(e['sources'])==n-len(ids_)
+# Changes made in the sheet on 2026-11-20 after the archived files were read as raw text (accountability rows 66 and 63).
+e=out['West Virginia']['2']
+e['sources'].append(dict(id='WV-D016',kind='ESSA consolidated state plan (U.S. Department of Education copy, archived)',
+    title="West Virginia's Consolidated State Plan under ESSA (resubmitted as final version January 9, 2018), as posted by the U.S. Department of Education",
+    issuer='West Virginia Department of Education; file posted by the U.S. Department of Education',
+    url='https://web.archive.org/web/20230408160238/https://www2.ed.gov/admins/lead/account/stateplan17/wvconsolidatedstateplanfinal.pdf',
+    note=ARCH%'April 8, 2023'))
+e['cite']=['West Virginia Consolidated State Plan under ESSA (resubmitted as final version January 9, 2018), p. 48 (Low-Income Student); pp. 10, 11, 14-16 (Economically Disadvantaged named); U.S. Department of Education copy (WV-D016)']
+e=out['South Dakota']['2']; a='(fetch read; the tool returned the cell in four pieces, joins unchecked)'; b='(raw file read 2026-11-20; the four quoted pieces run on as one cell, in this order)'
+assert sum(q.count(a) for q in e['quote'])==1; e['quote']=[q.replace(a,b) for q in e['quote']]
 json.dump(out,open('sources.json','w'))
 n=sum(len(e['sources']) for s in out.values() for e in s.values()); nu=sum(1 for s in out.values() for e in s.values() for x in e['sources'] if x['url'])
 print(len(out),'states;',n,'source links listed;',nu,'with an address;', sum(1 for s in out.values() for t,e in s.items() if not e['sources']),'topic lines with no source')
