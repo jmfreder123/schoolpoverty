@@ -88,6 +88,6 @@ assert len(events)==12
 for e in events: print(e['date'],e['basis'],e['id'],e['src']['id'],e['label'][:50])
 finsrc=[dict(id=prov[i][0],fy=2010+k,url=prov[i][4],status=prov[i][9]) for k,i in enumerate(['D0%d'%n for n in range(40,55)])]
 assert all(('elsec%02d'%(x['fy']-2000)) in x['url'] for x in finsrc),finsrc
-cpisrc=dict(id='D085',urls=['https://api.bls.gov/publicAPI/v2/timeseries/data/CUUR0000SA0?startyear=2009&endyear=2018','https://api.bls.gov/publicAPI/v2/timeseries/data/CUUR0000SA0?startyear=2019&endyear=2024'])
+cpisrc=dict(id='D085',urls=['https://api.bls.gov/publicAPI/v2/timeseries/data/CUUR0000SA0?startyear=2009&endyear=2018','https://api.bls.gov/publicAPI/v2/timeseries/data/CUUR0000SA0?startyear=2019&endyear=2024'],about=dict(id='D086',url='https://www.bls.gov/cpi/factsheets/cpi-series-ids.htm',title='BLS: what the series code CUUR0000SA0 stands for'))
 json.dump({'fin':fin,'events':events,'finsrc':finsrc,'cpisrc':cpisrc},open('graphs.json','w'),ensure_ascii=False,separators=(',',':'))
 import os;print(os.path.getsize('graphs.json'))
