@@ -17,6 +17,25 @@ for r in prov:
     r=r+['']*5
     if r[0]: 
         P[r[0]]=dict(id=r[0],kind=r[1],title=r[2],issuer=r[3],url=addr(r[4]))
+# Link fixes from the link check of 2026-11-20. The sheet's provenance tab (column E) was changed the same day; the rest of this
+# file still reads the sheet as it stood on 2026-11-11, so the changed addresses are set here by hand. note is shown after the link.
+ARCH='Internet Archive copy from %s; the original address no longer works'
+FIX={
+ 'IL-D001':('https://www.ilga.gov/Documents/legislation/ilcs/documents/010500050K18-8.15.htm',''),
+ 'IL-D004':('https://www.ilga.gov/Legislation/PublicActs/View/103-0532',''),
+ 'IL-D005':('https://www.ilga.gov/Documents/legislation/ilcs/documents/010501250K2.3.htm',''),
+ 'WI-D017':('https://dpi.wi.gov/sfs/statistical/basic-facts/section-f','the file is the link "2025-2026" on this page'),
+ 'WI-D021':('https://web.archive.org/web/20260218063342/https://dpi.wi.gov/administrators/biweekly-mailing/summary-changes-2025-act-15-2025-27-biennial-budget',ARCH%'February 18, 2026'),
+ 'CO-D011':('https://web.archive.org/web/20220303132719/http://www.cde.state.co.us/accountability/performanceframeworkcalculationguidebook',ARCH%'March 3, 2022'),
+ 'NC-D008':('https://web.archive.org/web/20260416161459/https://www.dpi.nc.gov/documents/fbs/allotments/state-allotment-policy-manual-fy-2026pdf/download',ARCH%'April 16, 2026'),
+ 'SD-D010':('https://web.archive.org/web/20260717020713/https://doe.sd.gov/reportcard/documents/0326-TechManual.pdf',ARCH%'July 17, 2026'),
+ 'ME-D009':('https://web.archive.org/web/20250206192642/https://www.maine.gov/doe/sites/maine.gov.doe/files/inline-files/ME_Amendment%20_VF_2.23.2024.pdf',ARCH%'February 6, 2025'),
+ 'VT-D006':('','the address no longer works and no other copy was found'),
+ 'WV-D015':('','the address no longer works and no other copy was found'),
+}
+for k,(u,n) in FIX.items():
+    P[k]['url']=u
+    if n: P[k]['note']=n
 col={'1':dict(cite=7,quote=4,ids=10),'2':dict(cite=6,quote=4,ids=7),'3':dict(cite=4,quote=6,ids=7),'4':dict(cite=8,quote=None,ids=9)}
 out={}
 for h in head:

@@ -375,7 +375,8 @@ function fieldsBlock(s,v){const dl=el('dl');const src=(s.src||{})[TABOF[v.id]]||
   if(src.quote.length&&v.id!=='mech'){const dd=el('dd',{class:'quote'});src.quote.join(' | ').split(/\s\|\|?\s/).forEach(q=>{if(q.trim())dd.appendChild(el('p',{},q.trim()))});add('What the source says (quoted; our notes are in square brackets)',dd)}
   if(src.cite.length)add('Cited as',el('dd',{},src.cite.join(' | ')));
   if(src.sources.length){const dd=el('dd');const ul=el('ul',{class:'srcs'});src.sources.forEach(x=>{const li=el('li');
-      if(x.url){li.appendChild(el('a',{href:x.url,target:'_blank',rel:'noopener'},x.title||x.id))}else{li.appendChild(el('span',{},(x.title||x.id)+' (no web address on record)'))}
+      if(x.url){li.appendChild(el('a',{href:x.url,target:'_blank',rel:'noopener'},x.title||x.id))}else{li.appendChild(el('span',{},(x.title||x.id)+(x.note?'':' (no web address on record)')))}
+      if(x.note)li.appendChild(el('span',{class:'hint'},' ('+x.note+')'));
       if(x.issuer)li.appendChild(el('span',{class:'hint'},' \u00b7 '+x.issuer));li.appendChild(el('span',{class:'mono'},' '+x.id));ul.appendChild(li)});dd.appendChild(ul);add('Sources read for this',dd)}
   add('How this was checked',el('dd',{},s[v.stat]||'not recorded'));return dl}
 function line(s,v){
