@@ -30,7 +30,6 @@ FIX={
  'NC-D008':('https://web.archive.org/web/20260416161459/https://www.dpi.nc.gov/documents/fbs/allotments/state-allotment-policy-manual-fy-2026pdf/download',ARCH%'April 16, 2026'),
  'SD-D010':('https://web.archive.org/web/20260717020713/https://doe.sd.gov/reportcard/documents/0326-TechManual.pdf',ARCH%'July 17, 2026'),
  'ME-D009':('https://web.archive.org/web/20250206192642/https://www.maine.gov/doe/sites/maine.gov.doe/files/inline-files/ME_Amendment%20_VF_2.23.2024.pdf',ARCH%'February 6, 2025'),
- 'VT-D006':('','the address no longer works and no other copy was found'),
  'WV-D015':('','the address no longer works and no other copy was found'),
 }
 for k,(u,n) in FIX.items():
@@ -51,6 +50,10 @@ for h in head:
     for i in ids:
         if i in P and P[i] not in e['sources']: e['sources'].append(P[i])
         elif i not in P: e['sources'].append(dict(id=i,kind='',title='(source row not found)',issuer='',url=''))
+# Sources taken off a line's list after the 2026-11-11 snapshot (Jack's decisions). The source rows stay in the sheet.
+DROP={('Vermont','2'):['VT-D006']}   # never read; address gone; removed from accountability row 65 on 2026-11-20
+for (st,tab),ids_ in DROP.items():
+    e=out[st][tab]; n=len(e['sources']); e['sources']=[x for x in e['sources'] if x['id'] not in ids_]; assert len(e['sources'])==n-len(ids_)
 json.dump(out,open('sources.json','w'))
 n=sum(len(e['sources']) for s in out.values() for e in s.values()); nu=sum(1 for s in out.values() for e in s.values() for x in e['sources'] if x['url'])
 print(len(out),'states;',n,'source links listed;',nu,'with an address;', sum(1 for s in out.values() for t,e in s.items() if not e['sources']),'topic lines with no source')
