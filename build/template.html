@@ -218,8 +218,8 @@ footer{font-size:13px;color:var(--ink3);border-top:1px solid var(--rule);padding
     <h2>Graphs</h2>
 
     <div class="gblock">
-      <h3>School revenue per student, fiscal years 2010 to 2024</h3>
-      <p class="hint">Revenue from state, local and federal sources together, divided by enrollment. Dollars are as reported each year and are not adjusted for inflation, so part of every rise is rising prices. Grey lines are the other states. Choose a state on the map, or a line here, to compare it with the United States.</p>
+      <h3>School revenue per student, fiscal years 2010 to 2024, in 2024 dollars</h3>
+      <p class="hint">Revenue from state, local and federal sources together, divided by enrollment. Every year is adjusted for inflation and shown in fiscal year 2024 dollars. Grey lines are the other states. Choose a state on the map, or a line here, to compare it with the United States.</p>
       <div class="key" id="ppkey"></div>
       <div class="plot" id="ppplot"></div>
     </div>
@@ -236,6 +236,7 @@ footer{font-size:13px;color:var(--ink3);border-top:1px solid var(--rule);padding
       <div class="col" style="margin-top:10px">
         <div class="scroll"><table id="fintab"></table></div>
         <p class="hint">Source: U.S. Census Bureau, Annual Survey of School System Finances, tables for fiscal years 2010 to 2024: Table 1 for revenue and Table 19 for enrollment. The per-student figure is total revenue divided by enrollment, worked out for this page. The figures were read from the Census workbooks by a script, not typed.</p>
+        <p class="hint">Inflation adjustment: U.S. Bureau of Labor Statistics, Consumer Price Index for All Urban Consumers (CPI-U), all items, U.S. city average, not seasonally adjusted, series CUUR0000SA0. The monthly index was averaged over July to June for each fiscal year. Each year's figure was multiplied by the fiscal year 2024 average and divided by that year's average. Some states' fiscal years do not run July to June, so the match is close but not exact for them.</p>
         <ul class="srcs" id="finsrc"></ul>
       </div>
     </details>
@@ -449,10 +450,10 @@ function lineChart(host,o){
 }
 function graphs(){
   const s=sel?byAb[sel]:null,who=s?FIN.st[s.abbr]:FIN.US,name=s?s.state:'United States';
-  const ctx=S.map(x=>({ab:x.abbr,name:x.state,vals:FIN.st[x.abbr].pp}));
-  const ser=[{ab:'US',name:'United States',color:'var(--ink)',vals:FIN.US.pp}];if(s)ser.push({ab:s.abbr,name:s.state,color:'var(--c1)',vals:FIN.st[s.abbr].pp});
+  const ctx=S.map(x=>({ab:x.abbr,name:x.state,vals:FIN.st[x.abbr].ppr}));
+  const ser=[{ab:'US',name:'United States',color:'var(--ink)',vals:FIN.US.ppr}];if(s)ser.push({ab:s.abbr,name:s.state,color:'var(--c1)',vals:FIN.st[s.abbr].ppr});
   keyRow($('ppkey'),ser.map(x=>[x.name,x.color]).concat([[s?'Other states':'Each state','',true]]));
-  lineChart($('ppplot'),{label:'Line chart of school revenue per student by fiscal year, 2010 to 2024',series:ser,ctx:ctx,ymax:40000,ticks:[0,10000,20000,30000,40000],afmt:usd,yfmt:usd,xlab:i=>'Fiscal year '+YRS[i],onPick:pick});
+  lineChart($('ppplot'),{label:'Line chart of school revenue per student by fiscal year, 2010 to 2024, in fiscal year 2024 dollars',series:ser,ctx:ctx,ymax:45000,ticks:[0,10000,20000,30000,40000],afmt:usd,yfmt:usd,xlab:i=>'Fiscal year '+YRS[i],onPick:pick});
   const sh=[{ab:'s',name:'State',color:'var(--c1)',vals:who.s},{ab:'l',name:'Local',color:'var(--c2)',vals:who.l},{ab:'f',name:'Federal',color:'var(--c3)',vals:who.f}].filter(x=>x.vals.some(v=>v!=null));
   $('shh').textContent='Where school money comes from: '+name;
   $('shsub').textContent='Share of school revenue from state, local and federal sources, fiscal years 2010 to 2024.'+(s?'':' Choose a state on the map to see its shares.');
@@ -461,9 +462,9 @@ function graphs(){
   const notes=[];if(s&&sh.length<3)notes.push('The Census tables give no state revenue figure for '+(s.state==='District of Columbia'?'the District of Columbia':s.state)+', so there is no state line.');
   if(who.gap)notes.push(name+', fiscal year '+who.gap.join(', ')+': the state, local and federal figures in the Census table do not add up to its total, so no shares are shown for that year.');
   $('shnote').hidden=!notes.length;$('shnote').textContent=notes.join(' ');
-  const T=$('fintab');T.textContent='';const hr=el('tr');['Fiscal year','Revenue per student, '+name].concat(s?['Revenue per student, United States']:[]).concat(['State share','Local share','Federal share']).forEach(h=>hr.appendChild(el('th',{},h)));T.appendChild(hr);
+  const T=$('fintab');T.textContent='';const hr=el('tr');['Fiscal year','Per student in 2024 dollars, '+name,'Per student as reported, '+name].concat(s?['Per student in 2024 dollars, United States']:[]).concat(['State share','Local share','Federal share']).forEach(h=>hr.appendChild(el('th',{},h)));T.appendChild(hr);
   const pc=v=>v==null?'not available':v.toFixed(1)+'%';
-  YRS.forEach((yr,i)=>{const tr=el('tr');[String(yr),usd(who.pp[i])].concat(s?[usd(FIN.US.pp[i])]:[]).concat([pc(who.s[i]),pc(who.l[i]),pc(who.f[i])]).forEach(c=>tr.appendChild(el('td',{},c)));T.appendChild(tr)});
+  YRS.forEach((yr,i)=>{const tr=el('tr');[String(yr),usd(who.ppr[i]),usd(who.pp[i])].concat(s?[usd(FIN.US.ppr[i])]:[]).concat([pc(who.s[i]),pc(who.l[i]),pc(who.f[i])]).forEach(c=>tr.appendChild(el('td',{},c)));T.appendChild(tr)});
   timeline();
 }
 const fmtDate=d=>{const [y,mo,da]=d.split('-').map(Number);return new Date(y,mo-1,da).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})};
@@ -488,7 +489,8 @@ function timeline(){
       d.addEventListener('toggle',()=>{const c=$('dot-'+e.id);if(c)c.classList.toggle('on',d.open)});L.appendChild(d)})}
   E.forEach(e=>{const c=$('dot-'+e.id),d=$('ev-'+e.id);if(c&&d&&d.open)c.classList.add('on')});
 }
-(function(){const U=$('finsrc');GRAPHS.finsrc.forEach(x=>{const li=el('li');li.appendChild(el('a',{href:x.url,target:'_blank',rel:'noopener'},'Census workbook, fiscal year '+x.fy+' (spreadsheet file)'));li.appendChild(el('span',{class:'mono'},' '+x.id));U.appendChild(li)})})();
+(function(){const U=$('finsrc');GRAPHS.finsrc.forEach(x=>{const li=el('li');li.appendChild(el('a',{href:x.url,target:'_blank',rel:'noopener'},'Census workbook, fiscal year '+x.fy+' (spreadsheet file)'));li.appendChild(el('span',{class:'mono'},' '+x.id));U.appendChild(li)});
+  GRAPHS.cpisrc.urls.forEach((u,i)=>{const li=el('li');li.appendChild(el('a',{href:u,target:'_blank',rel:'noopener'},'BLS price index, monthly values '+(i?'2019 to 2024':'2009 to 2018')+' (data file)'));li.appendChild(el('span',{class:'mono'},' '+GRAPHS.cpisrc.id));U.appendChild(li)})})();
 let rsz=null;window.addEventListener('resize',()=>{clearTimeout(rsz);rsz=setTimeout(graphs,150)});
 let sortKey='state',sortDir=1;
 function allTable(){const T=$('all');T.textContent='';const hr=el('tr');
