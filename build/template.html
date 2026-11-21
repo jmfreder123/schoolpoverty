@@ -482,10 +482,10 @@ function timeline(){
   const L=$('tllist');if(!L.childElementCount){E.forEach(e=>{const d=el('details',{id:'ev-'+e.id});const sm=el('summary');sm.appendChild(el('span',{class:'d'},fmtDate(e.date)));sm.appendChild(el('span',{},e.label));d.appendChild(sm);
       const b=el('div',{class:'body'});const dl=el('dl');const add=(t,node)=>{const w=el('div');w.appendChild(el('dt',{},t));w.appendChild(node);dl.appendChild(w)};
       add('Our summary of the source',el('dd',{},e.desc));
-      add('Date shown',el('dd',{},e.basis==='took effect'?('Took effect '+fmtDate(e.date)+(e.event_date&&e.event_date!==e.date?'. Law or rule dated '+fmtDate(e.event_date)+'.':'.')):('Law or rule dated '+fmtDate(e.date)+'. No separate effective date in the source read.')));
+      add('Date shown',el('dd',{},e.basis==='took effect'?('Took effect '+fmtDate(e.date)+(e.event_date&&e.event_date!==e.date?'. Law or rule dated '+fmtDate(e.event_date)+'.':'.')):('Law or rule dated '+fmtDate(e.date)+'.')));
       add('Cited as',el('dd',{},e.cite));
-      const dd=el('dd');dd.appendChild(el('a',{href:e.src.url,target:'_blank',rel:'noopener'},e.src.title));dd.appendChild(el('span',{class:'hint'},' · '+e.src.issuer));dd.appendChild(el('span',{class:'mono'},' '+e.src.id));add('Source read',dd);
-      add('How this was checked',el('dd',{},e.src.status));b.appendChild(dl);d.appendChild(b);
+      const ul=el('ul',{class:'srcs'});e.srcs.forEach(x=>{const li=el('li');li.appendChild(el('a',{href:x.url,target:'_blank',rel:'noopener'},x.title));li.appendChild(el('span',{class:'hint'},' · '+x.issuer));li.appendChild(el('span',{class:'mono'},' '+x.id));ul.appendChild(li)});const dd=el('dd');dd.appendChild(ul);add(e.srcs.length>1?'Sources read':'Source read',dd);
+      add('How this was checked',el('dd',{},e.srcs.length>1?e.srcs.map(x=>x.id+': '+x.status).join(' | '):e.srcs[0].status));b.appendChild(dl);d.appendChild(b);
       d.addEventListener('toggle',()=>{const c=$('dot-'+e.id);if(c)c.classList.toggle('on',d.open)});L.appendChild(d)})}
   E.forEach(e=>{const c=$('dot-'+e.id),d=$('ev-'+e.id);if(c&&d&&d.open)c.classList.add('on')});
 }

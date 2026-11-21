@@ -55,19 +55,20 @@ print('gaps',{k:v.get('gap') for k,v in list(fin['st'].items())+[('US',fin['US']
 print('no state share',[k for k,v in fin['st'].items() if all(x is None for x in v['s'])])
 print('US pp',fin['US']['pp'][0],fin['US']['pp'][-1],'max pp',max(max(v['pp']) for v in fin['st'].values()),'min',min(min(v['pp']) for v in fin['st'].values()))
 # events
-g=json.loads(json.load(open(D+'toolu_01Y8grooEYYcgSoE99dt4Qhm.json'))[0]['text'])['content']['sheets']
+_raw=open(D+'mcp-Google_Sheets-get_spreadsheet-1795226136667-nl5sfi.txt').read()   # sheet as read 2026-11-20, after the timeline corrections
+g=json.loads(_raw[_raw.index('{'):])['content']['sheets']
 def grid(title):
     sh=[s for s in g if s['properties']['title']==title][0]
     return [[c.get('formattedValue','') for c in row.get('values',[])] for row in sh['data'][0]['rowData']]
 ev=[r+['']*9 for r in grid('draft_events_log') if r and r[0].startswith('US-D')]
 prov={r[0]:r+['']*10 for r in grid('draft_provenance') if r}
-SRC={'US-D1':'D055','US-D2':'D055','US-D3':'D055','US-D4':'D055','US-D5':'D055','US-D6':'D055','US-D7':'D056','US-D8':'D057','US-D9':'D058','US-D10':'D059','US-D11':'D060','US-D12':'D061'}
+SRC={'US-D1':['D055'],'US-D2':['D055'],'US-D3':['D055'],'US-D4':['D055'],'US-D5':['D055','D056'],'US-D6':['D055'],'US-D7':['D056'],'US-D8':['D057'],'US-D9':['D058'],'US-D10':['D088','D059'],'US-D11':['D060'],'US-D12':['D061']}
 # Plain one-line labels, written for the page (not source text).
 LABEL={'US-D1':'Congress passes the Healthy, Hunger-Free Kids Act',
- 'US-D2':'States must directly certify most eligible children for free meals: 80 percent at first, rising to 95',
+ 'US-D2':'States get targets for direct certification: 80 percent at first, rising to 95',
  'US-D3':'A trial begins: selected districts certify children for free meals through Medicaid, with no application',
  'US-D4':'Schools get an option to serve free meals to all students, with no meal forms',
- 'US-D5':'The option starts in 3 states, with 4 more allowed in each of the next two years',
+ 'US-D5':'The option starts in Illinois, Kentucky and Michigan, with 4 more added in each of the next two years',
  'US-D6':'The option opens to every eligible district in the country',
  'US-D7':'USDA proposes rules for the free-meals-for-all option',
  'US-D8':'USDA’s final rules for the option take effect',
@@ -80,12 +81,11 @@ for r in ev:
     eid,_,_,edate,eff,dom,typ,desc,cite=r[:9]
     plot=eff if re.match(r'\d{4}-\d\d-\d\d$',eff) else edate
     assert re.match(r'\d{4}-\d\d-\d\d$',plot),(eid,edate,eff)
-    p=prov[SRC[eid]]
     events.append(dict(id=eid,date=plot,basis=('took effect' if plot==eff else 'dated'),event_date=edate,effective=eff,label=LABEL[eid],desc=desc,cite=cite,
-        src=dict(id=p[0],title=p[2],issuer=p[3],url=p[4],status=p[9])))
+        srcs=[dict(id=prov[i][0],title=prov[i][2],issuer=prov[i][3],url=prov[i][4],status=prov[i][9]) for i in SRC[eid]]))
 events.sort(key=lambda e:(e['date'],e['id']))
 assert len(events)==12
-for e in events: print(e['date'],e['basis'],e['id'],e['src']['id'],e['label'][:50])
+for e in events: print(e['date'],e['basis'],e['id'],[x['id'] for x in e['srcs']],e['label'][:60])
 finsrc=[dict(id=prov[i][0],fy=2010+k,url=prov[i][4],status=prov[i][9]) for k,i in enumerate(['D0%d'%n for n in range(40,55)])]
 assert all(('elsec%02d'%(x['fy']-2000)) in x['url'] for x in finsrc),finsrc
 cpisrc=dict(id='D085',urls=['https://api.bls.gov/publicAPI/v2/timeseries/data/CUUR0000SA0?startyear=2009&endyear=2018','https://api.bls.gov/publicAPI/v2/timeseries/data/CUUR0000SA0?startyear=2019&endyear=2024'],about=[dict(id='D087',url='https://data.bls.gov/timeseries/CUUR0000SA0?years_option=all_years',title='BLS data page for the series: its title, base period and monthly values'),dict(id='D086',url='https://www.bls.gov/cpi/factsheets/cpi-series-ids.htm',title='BLS fact sheet: how the series code is built')])
