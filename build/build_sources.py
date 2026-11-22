@@ -12,11 +12,16 @@ def addr(cell):
     c=c[c.index('http'):].split(' ; ')[0]
     c=re.sub(r'\s+\(.*\)\s*$','',c).strip().rstrip('.,')
     return c.replace(' ','%20')
+# Sources that must never appear on the public page (Jack, 2026-11-22: "don't make them public"): the Nexis Uni copies he downloaded.
+# They are cited in the sheet by source ID with no web address; the files are only in his Obsidian vault. Listed by ID here, and any
+# provenance row whose type or address cell says 'not public' or 'Nexis Uni' is caught as well.
+PRIVATE={'D089','D090','DC-D014','MS-D013','KY-D013'}
 P={}
 for r in prov:
     r=r+['']*5
     if r[0]: 
         P[r[0]]=dict(id=r[0],kind=r[1],title=r[2],issuer=r[3],url=addr(r[4]))
+        if 'not public' in (r[1]+' '+r[4]).lower() or 'nexis uni' in (r[1]+' '+r[4]).lower(): PRIVATE.add(r[0])
 # Link fixes from the link check of 2026-11-20. The sheet's provenance tab (column E) was changed the same day; the rest of this
 # file still reads the sheet as it stood on 2026-11-11, so the changed addresses are set here by hand. note is shown after the link.
 ARCH='Internet Archive copy from %s; the original address no longer works'
@@ -64,6 +69,9 @@ e['sources'].append(dict(id='WV-D016',kind='ESSA consolidated state plan (U.S. D
 e['cite']=['West Virginia Consolidated State Plan under ESSA (resubmitted as final version January 9, 2018), p. 48 (Low-Income Student); pp. 10, 11, 14-16 (Economically Disadvantaged named); U.S. Department of Education copy (WV-D016)']
 e=out['South Dakota']['2']; a='(fetch read; the tool returned the cell in four pieces, joins unchecked)'; b='(raw file read 2026-11-20; the four quoted pieces run on as one cell, in this order)'
 assert sum(q.count(a) for q in e['quote'])==1; e['quote']=[q.replace(a,b) for q in e['quote']]
+for s_ in out.values():
+    for e in s_.values(): e['sources']=[x for x in e['sources'] if x['id'] not in PRIVATE]
+assert not any(x['id'] in PRIVATE for s_ in out.values() for e in s_.values() for x in e['sources'])
 json.dump(out,open('sources.json','w'))
 n=sum(len(e['sources']) for s in out.values() for e in s.values()); nu=sum(1 for s in out.values() for e in s.values() for x in e['sources'] if x['url'])
 print(len(out),'states;',n,'source links listed;',nu,'with an address;', sum(1 for s in out.values() for t,e in s.items() if not e['sources']),'topic lines with no source')
